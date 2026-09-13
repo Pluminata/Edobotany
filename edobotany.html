@@ -1,0 +1,3893 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Edobotany Notebook v1.6.2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&family=Noto+Serif+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/pinyin-pro@3/dist/index.js"></script>
+<style>
+:root {
+  --bg: #faf9f6; --sidebar-bg: #f2efe9; --card: #ffffff;
+  --border: #ddd6c9; --border-light: #ebe5d9;
+  --text: #2b2620; --text-soft: #5c5448; --muted: #9a9082;
+  --primary: #4a6b3f; --primary-soft: #e8efe2;
+  --accent2: #9c5a2e; --accent2-soft: #f7ebe0;
+  --danger: #a83a2c;
+  --font-sans: "Noto Sans SC", "Source Han Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+  --font-serif: "Noto Serif SC", "Source Han Serif SC", "Songti SC", Georgia, serif;
+  --body-font: var(--font-sans);
+  --serif: var(--font-serif);
+  --base-size: 17px;
+}
+body.font-mode-serif { --body-font: var(--font-serif); --serif: var(--font-serif); }
+body.font-mode-sans { --body-font: var(--font-sans); --serif: var(--font-sans); }
+html { font-size: var(--base-size); }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: var(--body-font);
+  font-size: 1rem;
+  font-weight: 1000;
+  background: var(--bg); color: var(--text); line-height: 1.65;
+  height: 100vh; display: flex; overflow: hidden;
+}
+.sidebar { width: 22rem; flex-shrink: 0; background: var(--sidebar-bg);
+  border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; }
+.sidebar-header { padding: 0.8rem 0.95rem 0.3rem; }
+.sidebar-header h2 { font-size: 0.95rem; font-weight: 800; display: flex; align-items: baseline; gap: 0.35rem; }
+.sidebar-header h2 .brand-sub { font-family: var(--serif); font-style: italic; color: var(--primary); font-size: 0.9rem; }
+.sidebar-header small { font-size: 0.7rem; color: var(--muted); font-weight: 400; }
+.font-controls { display: flex; align-items: center; gap: 0.45rem; padding: 0.3rem 0.95rem 0.4rem; }
+.font-controls label { font-size: 0.7rem; color: var(--muted); }
+.font-controls input[type=range] { flex: 1; }
+.font-controls .size-display { font-size: 0.7rem; color: var(--muted); min-width: 2rem; text-align: right; }
+.tree-switch { padding: 0.25rem 0.7rem 0.45rem; display: flex; gap: 0.25rem; }
+.tree-switch button { flex: 1; padding: 0.3rem 0.45rem; font-size: 0.75rem; }
+.tree-switch button.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+.index-bar { padding: 0.25rem 0.6rem 0.45rem; display: flex; flex-wrap: wrap; gap: 0.25rem; }
+.index-btn {
+  padding: 0.25rem 0.5rem; font-size: 0.72rem; border-radius: 0.7rem;
+  background: var(--card); border: 1px solid var(--border);
+  color: var(--text-soft); cursor: pointer; transition: all .12s; white-space: nowrap;
+}
+.index-btn:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-soft); }
+.index-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+.search-container { padding: 0.25rem 0.7rem 0.45rem; }
+.search-container input { width: 100%; padding: 0.45rem 0.7rem; border: 1px solid var(--border);
+  border-radius: 0.4rem; font-size: 0.8rem; font-family: inherit; background: var(--card); color: var(--text); }
+.search-container input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-soft); }
+.toolbar { padding: 0.25rem 0.7rem 0.6rem; display: flex; flex-wrap: wrap; gap: 0.3rem; }
+.toolbar button, .toolbar .dropbtn { background: var(--card); border: 1px solid var(--border);
+  border-radius: 0.35rem; padding: 0.3rem 0.6rem; font-size: 0.75rem; cursor: pointer; color: var(--text-soft);
+  font-family: inherit; transition: all .12s; white-space: nowrap; }
+.toolbar button:hover, .toolbar .dropbtn:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-soft); }
+.toolbar button.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+.dropdown { position: relative; display: inline-block; }
+.dropdown-content {
+  display: none; position: absolute; top: 100%; left: 0; z-index: 50;
+  background: var(--card); border: 1px solid var(--border); border-radius: 0.4rem;
+  padding-top: 0.25rem;
+  margin-top: 0;
+  min-width: 10rem; box-shadow: 0 6px 20px rgba(40,32,22,.12);
+  background-clip: padding-box;
+}
+.dropdown-content::before {
+  content: ''; position: absolute; top: -0.35rem; left: 0; right: 0; height: 0.35rem;
+}
+.dropdown:hover .dropdown-content { display: block; }
+.dropdown-content a { display: block; padding: 0.4rem 0.8rem; font-size: 0.75rem;
+  color: var(--text-soft); text-decoration: none; cursor: pointer; }
+.dropdown-content a:hover { background: var(--primary-soft); color: var(--primary); }
+.dropdown-content a.danger { color: var(--danger); }
+.dropdown-content a.danger:hover { background: #f8e8e5; }
+.tree-wrap { flex: 1; overflow-y: auto; padding: 0.45rem 0.6rem 1.2rem; }
+.tree-wrap::-webkit-scrollbar { width: 8px; }
+.tree-wrap::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+.tree-node { margin-bottom: 1px; }
+.tree-node .node-label {
+  display: flex; align-items: center; gap: 0.3rem;
+  padding: 0.25rem 0.45rem; border-radius: 0.35rem; cursor: pointer;
+  font-size: 0.8rem; user-select: none; transition: background .12s;
+}
+.tree-node .node-label:hover { background: var(--card); }
+.tree-node .node-label.active { background: var(--primary); color: #fff; }
+.tree-node .node-label.active .rank,
+.tree-node .node-label.active .latin,
+.tree-node .node-label.active .count { color: rgba(255,255,255,.75); }
+.tree-node .node-label.dragging { opacity: .5; }
+.tree-node .node-label .arrow {
+  font-size: 0.5rem; color: var(--muted); width: 0.7rem;
+  transition: transform .15s; flex-shrink: 0;
+}
+.tree-node .node-label .arrow.open { transform: rotate(90deg); }
+.tree-node .node-label .rank {
+  font-size: 0.7rem; color: var(--muted); font-style: italic; margin-left: 0.1rem; flex-shrink: 0;
+}
+.tree-node .node-label .name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tree-node .node-label .latin {
+  font-family: var(--serif); font-style: italic;
+  font-size: 0.7rem; color: var(--muted); flex-shrink: 0;
+}
+.tree-node .node-label .latin.upright { font-style: normal; }
+.tree-node .node-label .count {
+  font-size: 0.7rem; color: var(--muted); margin-left: auto; flex-shrink: 0;
+}
+.tree-children {
+  margin-left: 0.8rem; border-left: 1px solid var(--border-light);
+  padding-left: 0.25rem; min-height: 4px;
+}
+.tree-node .node-label .drag-handle {
+  display: none; cursor: grab; color: var(--muted); font-size: 0.7rem;
+  padding: 0 0.1rem; flex-shrink: 0;
+}
+body.edit-mode .tree-node .node-label .drag-handle { display: inline-block; }
+.tree-node .node-label .drag-handle:active { cursor: grabbing; }
+.main { flex: 1; overflow-y: auto; padding: 1.4rem 1.9rem 3.5rem; display: flex; flex-direction: column; }
+.main::-webkit-scrollbar { width: 10px; }
+.main::-webkit-scrollbar-thumb { background: var(--border); border-radius: 5px; }
+.main-empty { text-align: center; color: var(--muted); padding: 5.9rem 1.2rem; font-size: 0.9rem; flex: 1; display: flex; flex-direction: column; justify-content: center; }
+.main-empty .big { font-size: 2.8rem; margin-bottom: 0.7rem; opacity: .4; }
+.main-header {
+  margin-bottom: 0.95rem; padding-bottom: 0.8rem;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: flex-start; gap: 0.95rem; flex-wrap: wrap;
+}
+.main-header .title-block { flex: 1; min-width: 11.8rem; }
+.main-header h2 { font-size: 1.35rem; font-weight: 800; }
+.main-header .sub { font-family: var(--serif); font-style: italic; color: var(--text-soft); font-size: 0.9rem; margin-top: 0.1rem; }
+.main-header .taxon-line { font-size: 0.8rem; color: var(--muted); margin-top: 0.25rem; }
+.main-header .actions { display: flex; gap: 0.35rem; flex-wrap: wrap; }
+.view-toggle { display: flex; gap: 2px; border: 1px solid var(--border); border-radius: 0.35rem; overflow: hidden; }
+.view-toggle button {
+  border: none; border-radius: 0; padding: 0.3rem 0.6rem; font-size: 0.75rem;
+  background: var(--card); color: var(--text-soft);
+}
+.view-toggle button.active { background: var(--primary); color: #fff; }
+.view-toggle button:hover:not(.active) { background: var(--primary-soft); color: var(--primary); }
+.card-area { flex: 1; }
+.record-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(17.6rem, 1fr)); gap: 0.95rem;
+}
+.record-list { display: flex; flex-direction: column; gap: 0.45rem; }
+.record-list-item {
+  background: var(--card); border: 1px solid var(--border); border-radius: 0.5rem;
+  padding: 0.7rem 0.95rem; cursor: pointer; transition: all .12s;
+  display: flex; align-items: center; gap: 0.7rem;
+}
+.record-list-item:hover { border-color: var(--primary); box-shadow: 0 2px 8px rgba(60,50,35,.06); }
+.record-list-item .li-title { font-weight: 800; font-size: 0.9rem; flex-shrink: 0; }
+.record-list-item .li-latin { font-family: var(--serif); font-style: italic; color: var(--muted); font-size: 0.8rem; }
+.record-list-item .li-latin.upright { font-style: normal; }
+.record-list-item .li-meta { margin-left: auto; font-size: 0.75rem; color: var(--muted); }
+.record-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 0.65rem; overflow: hidden; cursor: pointer;
+  transition: box-shadow .18s, transform .18s, border-color .18s;
+  box-shadow: 0 1px 3px rgba(60,50,35,.05); display: flex; flex-direction: column;
+}
+.record-card:hover { box-shadow: 0 4px 16px rgba(60,50,35,.1); transform: translateY(-2px); border-color: #d4c9b5; }
+.record-card .card-img { width: 100%; height: 10.6rem; object-fit: cover;
+  background: linear-gradient(135deg, #ede7db, #e0d8c7); display: block; }
+.record-card .card-img.placeholder { display: flex; align-items: center; justify-content: center;
+  color: var(--muted); font-size: 0.75rem; }
+.record-card .card-body { padding: 0.7rem 0.8rem 0.8rem; flex: 1; }
+.record-card .card-ipa { font-family: var(--serif); font-size: 1rem; color: var(--accent2); line-height: 1.3; }
+.record-card .card-name { font-size: 0.95rem; font-weight: 800; margin-top: 0.15rem; }
+.record-card .card-latin { font-family: var(--serif); font-style: italic; font-size: 0.8rem; color: var(--text-soft); margin-top: 0.1rem; }
+.record-card .card-latin.upright { font-style: normal; }
+.record-card .card-meta { margin-top: 0.5rem; display: flex; flex-wrap: wrap; gap: 0.25rem; }
+.tag { font-size: 0.7rem; padding: 0.1rem 0.5rem; border-radius: 1.2rem; background: var(--primary-soft); color: var(--primary); }
+.tag.way { background: var(--accent2-soft); color: var(--accent2); }
+.tag.region { background: #ecebe6; color: var(--text-soft); }
+.tag.dish { background: #f0ece4; color: var(--text-soft); font-style: italic; }
+.tag.lang { background: #e8eef7; color: #3d5a80; }
+.tag.ethnic { background: #f7e8ee; color: #8b3a62; }
+.detail-wrap { max-width: 48rem; }
+.detail-card { background: var(--card); border: 1px solid var(--border);
+  border-radius: 0.8rem; padding: 1.65rem 1.75rem; box-shadow: 0 1px 3px rgba(60,50,35,.05); }
+.detail-card h3 { font-size: 1.4rem; font-weight: 800; }
+.detail-card .latin-big { font-family: var(--serif); font-style: italic; font-size: 0.95rem; color: var(--text-soft); margin-top: 0.25rem; }
+.detail-card .latin-big .author { font-style: normal; font-family: var(--body-font); font-size: 0.8rem; color: var(--muted); margin-left: 0.25rem; }
+.field { margin: 0.95rem 0; }
+.field > label { font-size: 0.7rem; font-weight: 700; color: var(--muted);
+  text-transform: uppercase; letter-spacing: .08em; display: block; margin-bottom: 0.35rem; }
+.field .value { font-size: 0.9rem; }
+.field .value.muted { color: var(--muted); }
+.record-entry {
+  padding: 0.7rem 0.8rem; border: 1px solid var(--border-light); border-radius: 0.5rem;
+  background: var(--bg); margin-bottom: 0.45rem;
+}
+details.record-entry > summary.entry-head {
+  list-style: none;
+  cursor: pointer;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  align-items: center;
+  margin-bottom: 0;
+}
+details.record-entry > summary.entry-head::-webkit-details-marker { display: none; }
+details.record-entry > summary.entry-head::before {
+  content: '▶'; display: inline-block; margin-right: 0.35rem;
+  font-size: 0.6rem; color: var(--muted); transition: transform .15s;
+}
+details.record-entry[open] > summary.entry-head::before {
+  transform: rotate(90deg);
+}
+details.record-entry .entry-body {
+  margin-top: 0.45rem;
+  padding-top: 0.35rem;
+  border-top: 1px dashed var(--border-light);
+}
+.record-entry .entry-head {
+  display: flex; flex-wrap: wrap; gap: 0.35rem; align-items: center; margin-bottom: 0.45rem;
+}
+.record-entry .entry-line {
+  display: flex; flex-wrap: wrap; gap: 0.45rem; align-items: baseline;
+  margin-bottom: 0.35rem; font-size: 0.85rem;
+}
+.record-entry .entry-line .lbl {
+  font-size: 0.7rem; color: var(--muted); text-transform: uppercase;
+  letter-spacing: .06em; min-width: 3.3rem;
+}
+.record-entry .entry-line .name-big { font-size: 0.95rem; font-weight: 800; }
+.record-entry .entry-line .ipa { font-family: var(--serif); color: var(--accent2); }
+.usage-block {
+  padding: 0.45rem 0.6rem; border-left: 3px solid var(--primary);
+  background: var(--card); border-radius: 0.3rem; margin-top: 0.35rem;
+}
+.usage-block .usage-parts { font-size: 0.8rem; margin-bottom: 0.25rem; }
+.usage-block .usage-ways { display: flex; flex-direction: column; gap: 0.1rem; }
+.usage-block .usage-way-item { font-size: 0.8rem; display: flex; flex-direction: column; gap: 0.25rem; padding: 0.35rem 0; border-bottom: 1px dashed var(--border-light); }
+.usage-block .usage-way-item:last-child { border-bottom: none; }
+.usage-block .usage-way-item .way-line { display: flex; gap: 0.35rem; align-items: baseline; }
+.usage-block .usage-way-item .way-tag { color: var(--accent2); font-weight: 500; }
+.usage-block .usage-way-item .way-dish { color: var(--text-soft); font-style: italic; }
+.usage-block .usage-way-item .way-dish::before { content: "· "; }
+.usage-block .usage-way-item .way-method { font-size: 0.75rem; color: var(--muted); margin-left: 0.8rem; }
+.usage-block .usage-way-item .way-method::before { content: "菜品详细做法："; }
+.photos { display: flex; gap: 0.6rem; flex-wrap: wrap; margin-top: 0.35rem; }
+.photos img { width: 7.6rem; height: 5.8rem; object-fit: cover;
+  border-radius: 0.5rem; border: 1px solid var(--border); cursor: zoom-in; transition: transform .15s; }
+.photos img:hover { transform: scale(1.03); }
+.photos .photo-with-caption { display: flex; flex-direction: column; gap: 0.1rem; }
+.photos .photo-caption { font-size: 0.7rem; color: var(--muted); max-width: 7.6rem; text-align: center; }
+.detail-actions { margin-top: 1.4rem; display: flex; gap: 0.45rem;
+  padding-top: 1rem; border-top: 1px solid var(--border-light); }
+button { background: var(--card); border: 1px solid var(--border); border-radius: 0.4rem;
+  padding: 0.4rem 0.9rem; font-size: 0.8rem; cursor: pointer; color: var(--text-soft);
+  font-family: inherit; transition: all .15s; }
+button:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-soft); }
+button.primary { background: var(--primary); color: #fff; border-color: var(--primary); font-weight: 500; }
+button.primary:hover { background: #3d5a34; }
+button.danger { color: var(--danger); }
+button.danger:hover { border-color: var(--danger); background: #f8e8e5; color: var(--danger); }
+button.ghost { border-color: transparent; background: transparent; }
+button.ghost:hover { background: var(--primary-soft); }
+button.mini { padding: 0.25rem 0.5rem; font-size: 0.75rem; }
+.modal-overlay { display: none; position: fixed; inset: 0;
+  background: rgba(40,32,22,.42); backdrop-filter: blur(2px);
+  z-index: 200; align-items: flex-start; justify-content: center;
+  padding: 2.35rem 1.2rem; overflow-y: auto; }
+.modal-overlay.open { display: flex; }
+.modal { background: var(--card); border-radius: 0.8rem; padding: 1.5rem 1.65rem;
+  width: 100%; max-width: 47rem; box-shadow: 0 20px 60px rgba(40,32,22,.25);
+  animation: modalIn .2s ease; position: relative; }
+@keyframes modalIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+.modal.modal-sm { max-width: 31.8rem; }
+.modal.modal-lg { max-width: 58.8rem; }
+.modal-close { position: absolute; top: 0.8rem; right: 0.95rem; background: transparent; border: none;
+  font-size: 1.4rem; color: var(--muted); cursor: pointer; padding: 0.1rem 0.45rem; line-height: 1; }
+.modal-close:hover { color: var(--danger); background: transparent; }
+.modal h3 { font-size: 1.2rem; margin-bottom: 1.2rem; }
+.form-row { margin-bottom: 0.75rem; }
+.form-row > label { display: block; font-size: 0.75rem; font-weight: 800;
+  color: var(--text-soft); margin-bottom: 0.3rem; }
+.form-row input, .form-row textarea, .form-row select {
+  width: 100%; padding: 0.5rem 0.7rem; border: 1px solid var(--border); border-radius: 0.4rem;
+  font-size: 0.9rem; font-family: inherit; background: var(--card); color: var(--text); }
+.form-row input:focus, .form-row textarea:focus, .form-row select:focus {
+  outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-soft); }
+.form-row textarea { min-height: 4.1rem; resize: vertical; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0.7rem; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.7rem; }
+.hint { font-size: 0.75rem; color: var(--muted); margin-top: 0.15rem; }
+.form-actions { display: flex; gap: 0.45rem; justify-content: flex-end;
+  margin-top: 1.2rem; padding-top: 0.95rem; border-top: 1px solid var(--border-light); }
+.record-entries { display: flex; flex-direction: column; gap: 0.8rem; }
+.record-entry-form {
+  padding: 0.7rem; border: 1px solid var(--border-light); border-radius: 0.5rem;
+  background: var(--bg); position: relative;
+}
+.record-entry-form .entry-title {
+  font-size: 0.75rem; font-weight: 700; color: var(--muted);
+  text-transform: uppercase; letter-spacing: .08em;
+  display: flex; justify-content: space-between; align-items: center;
+  list-style: none;
+  cursor: pointer;
+}
+.record-entry-form .entry-title::-webkit-details-marker { display: none; }
+.record-entry-form .entry-title::before {
+  content: '▶'; display: inline-block; margin-right: 0.35rem;
+  font-size: 0.6rem; color: var(--muted); transition: transform .15s;
+}
+details.record-entry-form[open] .entry-title::before {
+  transform: rotate(90deg);
+}
+.record-entry-form .entry-title .entry-actions { display: flex; gap: 0.25rem; }
+.record-entry-form .entry-title .entry-actions button { padding: 0.1rem 0.35rem; font-size: 0.7rem; }
+.record-entry-form .row { display: grid; gap: 0.45rem; margin-bottom: 0.45rem; }
+.record-entry-form .row-2 { grid-template-columns: 1fr 1fr; }
+.record-entry-form .row-3 { grid-template-columns: 1fr 1fr 1fr; }
+.record-entry-form .row-4 { grid-template-columns: 1fr 1fr 1fr 2fr; }
+.record-entry-form .sub-label {
+  font-size: 0.7rem; color: var(--muted); font-weight: 800;
+  margin: 0.45rem 0 0.25rem; display: block;
+}
+.record-entry-form input {
+  width: 100%; padding: 0.4rem 0.6rem; border: 1px solid var(--border);
+  border-radius: 0.35rem; font-size: 0.8rem; font-family: inherit;
+  background: var(--card); color: var(--text);
+}
+.record-entry-form input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-soft); }
+.usage-list { display: flex; flex-direction: column; gap: 0.45rem; }
+.usage-entry {
+  padding: 0.45rem 0.6rem; border: 1px solid var(--border-light);
+  border-radius: 0.4rem; background: var(--card);
+}
+.usage-entry .usage-head {
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 0.7rem; color: var(--muted); font-weight: 800;
+  text-transform: uppercase; letter-spacing: .06em; margin-bottom: 0.3rem;
+}
+.usage-entry .usage-parts-row { margin-bottom: 0.35rem; }
+.usage-entry .usage-ways-list { display: flex; flex-direction: column; gap: 0.35rem; }
+.usage-way-row { display: flex; flex-direction: column; gap: 0.25rem; padding: 0.35rem 0.45rem; border: 1px solid var(--border-light); border-radius: 0.35rem; background: var(--bg); }
+.usage-way-row .way-row-top { display: grid; grid-template-columns: 1fr 1.5fr auto; gap: 0.35rem; align-items: center; }
+.usage-way-row .way-row-method { display: grid; grid-template-columns: 7.6rem 1fr; gap: 0.35rem; align-items: center; }
+.usage-way-row .way-row-method .lbl { font-size: 0.7rem; color: var(--muted); font-weight: 800; }
+.usage-way-row .way-photos-label { font-size: 0.7rem; color: var(--muted); font-weight: 800; margin-top: 0.25rem; }
+.usage-way-row .way-photos-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(7rem, 1fr));
+  gap: 0.35rem; margin-top: 0.25rem;
+}
+.usage-way-row .way-photos-grid .photo-edit-item img { height: 4.7rem; }
+.usage-way-row input[type=file] { display: none; }
+.usage-way-row .upload-btn {
+  display: inline-block; padding: 0.25rem 0.6rem; font-size: 0.75rem;
+  border: 1px solid var(--border); border-radius: 0.35rem;
+  background: var(--card); color: var(--text-soft); cursor: pointer;
+}
+.usage-way-row .upload-btn:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-soft); }
+.combo-sm { position: relative; }
+.combo-sm input {
+  width: 100%; padding: 0.4rem 0.6rem; border: 1px solid var(--border);
+  border-radius: 0.35rem; font-size: 0.8rem; font-family: inherit;
+  background: var(--card); color: var(--text);
+}
+.combo-sm input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-soft); }
+.combo-sm .dropdown-list {
+  position: absolute; top: 100%; left: 0; right: 0; z-index: 300;
+  background: var(--card); border: 1px solid var(--border); border-radius: 0.4rem;
+  margin-top: 0.25rem; max-height: 15rem; overflow-y: auto; display: none;
+  box-shadow: 0 6px 20px rgba(40,32,22,.12);
+}
+.combo-sm .dropdown-list.open { display: block; }
+.combo-sm .dropdown-list .opt { padding: 0.4rem 0.6rem; cursor: pointer; font-size: 0.8rem; }
+.combo-sm .dropdown-list .opt:hover, .combo-sm .dropdown-list .opt.hl { background: var(--primary-soft); color: var(--primary); }
+.combo-sm .dropdown-list .empty { padding: 0.4rem 0.6rem; font-size: 0.75rem; color: var(--muted); }
+.tag-combo {
+  display: flex; flex-wrap: wrap; gap: 0.3rem;
+  padding: 0.35rem 0.45rem; border: 1px solid var(--border);
+  border-radius: 0.4rem; background: var(--card); min-height: 2.25rem;
+  align-items: center; position: relative;
+}
+.tag-combo .picked {
+  display: inline-flex; align-items: center; gap: 0.25rem;
+  padding: 0.1rem 0.5rem; border-radius: 0.8rem;
+  background: var(--primary); color: #fff; font-size: 0.75rem;
+}
+.tag-combo .picked.way-tag { background: var(--accent2); }
+.tag-combo .picked .x { cursor: pointer; opacity: .7; }
+.tag-combo input {
+  border: none; outline: none; background: transparent;
+  font-size: 0.8rem; padding: 0.1rem 0.3rem; flex: 1; min-width: 5.3rem;
+  font-family: inherit; color: var(--text);
+}
+.tag-combo .tag-dropdown {
+  position: absolute; top: 100%; left: 0; right: 0; z-index: 300;
+  background: var(--card); border: 1px solid var(--border); border-radius: 0.4rem;
+  margin-top: 0.25rem; max-height: 14rem; overflow-y: auto; display: none;
+  box-shadow: 0 6px 20px rgba(40,32,22,.12);
+}
+.tag-combo .tag-dropdown.open { display: block; }
+.tag-combo .tag-dropdown .opt { padding: 0.4rem 0.7rem; cursor: pointer; font-size: 0.8rem; }
+.tag-combo .tag-dropdown .opt:hover, .tag-combo .tag-dropdown .opt.hl { background: var(--primary-soft); color: var(--primary); }
+.tag-combo .tag-dropdown .empty { padding: 0.4rem 0.7rem; font-size: 0.75rem; color: var(--muted); }
+.rank-choice { display: flex; gap: 0.35rem; flex-wrap: wrap; margin-top: 0.35rem; }
+.rank-choice button { padding: 0.25rem 0.6rem; font-size: 0.75rem; }
+.rank-choice button.selected { background: var(--primary); color: #fff; border-color: var(--primary); }
+.rank-dropdown { display: none; position: absolute; top: 100%; left: 0; right: 0;
+  background: var(--card); border: 1px solid var(--border); border-radius: 0.4rem;
+  margin-top: 0.25rem; max-height: 14rem; overflow-y: auto; z-index: 300;
+  box-shadow: 0 6px 20px rgba(40,32,22,.12); }
+.rank-dropdown .rank-opt { padding: 0.4rem 0.7rem; cursor: pointer; font-size: 0.85rem; display: flex; gap: 0.45rem; align-items: baseline; }
+.rank-dropdown .rank-opt:hover, .rank-dropdown .rank-opt.hl { background: var(--primary-soft); color: var(--primary); }
+.search-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.7rem; }
+.search-form-grid .full { grid-column: span 2; }
+.search-combo { position: relative; }
+.search-combo input {
+  width: 100%; padding: 0.45rem 0.6rem; border: 1px solid var(--border);
+  border-radius: 0.35rem; font-size: 0.8rem; font-family: inherit;
+  background: var(--card); color: var(--text);
+}
+.search-combo input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-soft); }
+.search-combo .dropdown-list {
+  position: absolute; top: 100%; left: 0; right: 0; z-index: 300;
+  background: var(--card); border: 1px solid var(--border); border-radius: 0.4rem;
+  margin-top: 0.25rem; max-height: 15rem; overflow-y: auto; display: none;
+  box-shadow: 0 6px 20px rgba(40,32,22,.12);
+}
+.search-combo .dropdown-list.open { display: block; }
+.search-combo .dropdown-list .opt { padding: 0.4rem 0.7rem; cursor: pointer; font-size: 0.85rem; display: flex; gap: 0.45rem; align-items: baseline; }
+.search-combo .dropdown-list .opt:hover, .search-combo .dropdown-list .opt.hl { background: var(--primary-soft); color: var(--primary); }
+.search-combo .dropdown-list .opt .opt-latin { font-family: var(--serif); font-style: italic; font-size: 0.75rem; color: var(--muted); }
+.search-combo .dropdown-list .empty { padding: 0.45rem 0.7rem; font-size: 0.8rem; color: var(--muted); }
+.lang-tree { max-height: 29rem; overflow-y: auto; border: 1px solid var(--border); border-radius: 0.4rem; padding: 0.45rem; background: var(--bg); }
+.lang-tree .lang-node { padding: 0.1rem 0; }
+.lang-tree .lang-label { padding: 0.15rem 0.45rem; border-radius: 0.3rem; cursor: pointer; font-size: 0.85rem; display: inline-block; }
+.lang-tree .lang-label:hover { background: var(--primary-soft); }
+.lang-tree .lang-label.selected { background: var(--primary); color: #fff; }
+.lang-tree .lang-children { margin-left: 0.95rem; border-left: 1px solid var(--border-light); padding-left: 0.25rem; }
+.photo-edit-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(7.6rem, 1fr));
+  gap: 0.45rem; margin-top: 0.35rem;
+}
+.photo-edit-item {
+  position: relative; border: 1px solid var(--border); border-radius: 0.5rem;
+  overflow: hidden; background: var(--bg); cursor: grab;
+}
+.photo-edit-item img { width: 100%; height: 5.3rem; object-fit: cover; display: block; pointer-events: none; }
+.photo-edit-item .photo-num {
+  position: absolute; top: 0.25rem; left: 0.25rem; background: rgba(0,0,0,.6); color: #fff;
+  font-size: 0.65rem; padding: 0.05rem 0.35rem; border-radius: 0.45rem;
+}
+.photo-edit-item .photo-remove {
+  position: absolute; top: 0.25rem; right: 0.25rem; background: rgba(168,58,44,.9); color: #fff;
+  border: none; border-radius: 50%; width: 1.3rem; height: 1.3rem; line-height: 1;
+  font-size: 0.8rem; cursor: pointer; padding: 0;
+}
+.photo-edit-item .photo-remove:hover { background: #c0392b; }
+.photo-edit-item .photo-cover {
+  position: absolute; bottom: 1.7rem; left: 0.25rem; right: 0.25rem;
+  background: rgba(74,107,63,.9); color: #fff; border: none;
+  border-radius: 0.3rem; padding: 0.15rem 0.35rem; font-size: 0.7rem; cursor: pointer;
+}
+.photo-edit-item .photo-cover:hover { background: rgba(61,90,52,1); }
+.photo-edit-item .photo-name-input {
+  width: 100%; border: none; border-top: 1px solid var(--border);
+  padding: 0.2rem 0.35rem; font-size: 0.7rem; font-family: inherit;
+  background: var(--card); color: var(--text); outline: none;
+}
+.photo-edit-item .photo-name-input:focus { background: var(--primary-soft); }
+.photo-edit-item.is-cover { border: 2px solid var(--primary); }
+.photo-edit-item.is-cover .photo-num { background: var(--primary); }
+.photo-edit-item.dragging { opacity: .5; }
+.photo-edit-item.drag-over { border-color: var(--primary); background: var(--primary-soft); }
+.photos-empty { color: var(--muted); font-size: 0.75rem; padding: 0.45rem 0; }
+.toast { position: fixed; bottom: 1.75rem; left: 50%; transform: translateX(-50%) translateY(20px);
+  background: rgba(40,32,22,.92); color: #fff; padding: 0.6rem 1.3rem; border-radius: 0.5rem;
+  font-size: 0.85rem; opacity: 0; pointer-events: none; transition: all .25s; z-index: 500; }
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.toast.warn { background: rgba(168,58,44,.95); }
+.empty { text-align: center; color: var(--muted); padding: 2.35rem 1.2rem; font-size: 0.85rem; }
+.empty .big { font-size: 2.35rem; margin-bottom: 0.7rem; opacity: .5; }
+.index-page { max-width: 54rem; }
+.index-page h2 { font-size: 1.25rem; font-weight: 800; margin-bottom: 0.35rem; }
+.index-page .desc { font-size: 0.8rem; color: var(--muted); margin-bottom: 0.95rem; }
+.index-search { margin-bottom: 0.95rem; }
+.index-search input {
+  width: 100%; padding: 0.5rem 0.7rem; border: 1px solid var(--border);
+  border-radius: 0.4rem; font-size: 0.8rem; font-family: inherit;
+  background: var(--card); color: var(--text);
+}
+.index-search input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-soft); }
+.dict-item {
+  padding: 0.35rem 0.6rem; border-radius: 0.35rem; cursor: pointer;
+  display: flex; align-items: baseline; gap: 0.6rem; font-size: 0.9rem;
+}
+.dict-item:hover { background: var(--primary-soft); }
+.dict-item .name { font-weight: 500; }
+.dict-item .latin { font-family: var(--serif); font-style: italic; font-size: 0.8rem; color: var(--muted); }
+.dict-item .count { font-size: 0.7rem; color: var(--muted); margin-left: auto; }
+.sci-item {
+  padding: 0.4rem 0.6rem; border-radius: 0.35rem; cursor: pointer;
+  font-family: var(--serif); font-size: 0.9rem; display: flex; align-items: baseline; gap: 0.6rem;
+}
+.sci-item:hover { background: var(--primary-soft); }
+.sci-item .latin { font-style: italic; }
+.sci-item .cn { font-size: 0.8rem; color: var(--muted); font-family: inherit; }
+.tag-cloud { display: flex; flex-wrap: wrap; gap: 0.45rem; }
+.tag-cloud .tag-item {
+  padding: 0.35rem 0.8rem; border-radius: 1.2rem; border: 1px solid var(--border);
+  cursor: pointer; font-size: 0.85rem; background: var(--card);
+  transition: all .12s;
+}
+.tag-cloud .tag-item:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-soft); }
+.tag-cloud .tag-item .count { font-size: 0.7rem; color: var(--muted); margin-left: 0.35rem; }
+.region-tree { font-size: 0.9rem; }
+.region-tree .region-node { padding: 0.15rem 0; }
+.region-tree .region-label {
+  display: inline-flex; align-items: center; gap: 0.25rem;
+  padding: 0.1rem 0.45rem; border-radius: 0.3rem; cursor: pointer;
+}
+.region-tree .region-label:hover { background: var(--primary-soft); }
+.region-tree .region-label .count { font-size: 0.7rem; color: var(--muted); margin-left: 0.35rem; }
+@media (max-width: 820px) {
+  body { flex-direction: column; }
+  .sidebar { width: 100%; max-height: 20rem; border-right: none; border-bottom: 1px solid var(--border); }
+  .main { padding: 1rem; }
+  .grid-2, .grid-3 { grid-template-columns: 1fr; }
+  .record-entry-form .row-3 { grid-template-columns: 1fr 1fr; }
+  .search-form-grid { grid-template-columns: 1fr; }
+  .search-form-grid .full { grid-column: auto; }
+  .usage-way-row .way-row-top { grid-template-columns: 1fr; }
+}
+.lang-split {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+}
+.lang-split-left {
+  flex: 0 0 20%;
+  min-width: 8rem;
+  border-right: 1px solid var(--border-light);
+  padding-right: 0.8rem;
+}
+.lang-split-right {
+  flex: 1;
+  min-width: 0;
+}
+.lang-split-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  margin-bottom: 0.45rem;
+}
+</style>
+</head>
+<body class="font-mode-sans">
+
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <h2><span class="brand-sub">Edobotany</span> <small>v1.6.2</small></h2>
+  </div>
+  <div class="font-controls">
+    <button id="fontModeBtn" onclick="toggleFontMode()" title="切换衬线/无衬线" style="padding:0.1rem 0.4rem;font-size:0.7rem">Aa</button>
+    <label>字号</label>
+    <input type="range" id="fontSizeRange" min="14" max="24" step="1" value="17" oninput="setFontSize(this.value)">
+    <span class="size-display" id="fontSizeDisplay">17</span>
+  </div>
+  <div class="tree-switch">
+    <button class="active" data-tree="taxon" onclick="switchTree('taxon')">🌿 分类学树</button>
+    <button data-tree="lang" onclick="switchTree('lang')">🗣️ 语言树</button>
+  </div>
+  <div class="index-bar" id="indexBar"></div>
+  <div class="search-container">
+    <input type="text" id="searchInput" placeholder="搜索分类群、俗名、学名..." autocomplete="off" oninput="onTreeSearch(this.value)">
+  </div>
+  <div class="toolbar">
+    <button id="editToggleBtn" onclick="toggleEditMode()">✎ 编辑模式</button>
+    <button onclick="openAdvancedSearch()" class="primary">🔍 高级搜索</button>
+    <div class="dropdown">
+      <button class="dropbtn">⇅ 排序 ⌵</button>
+      <div class="dropdown-content">
+        <a onclick="setTreeSort('pinyin'); return false;">按中文拼音</a>
+        <a onclick="setTreeSort('latin'); return false;">按拉丁字母</a>
+        <a onclick="setTreeSort('none'); return false;">按添加顺序</a>
+      </div>
+    </div>
+    <div class="dropdown">
+      <button class="dropbtn">📥 导入 ⌵</button>
+      <div class="dropdown-content">
+        <a onclick="document.getElementById('importFile').click(); return false;">📥 导入 JSON</a>
+      </div>
+    </div>
+    <div class="dropdown">
+      <button class="dropbtn">📤 导出 ⌵</button>
+      <div class="dropdown-content">
+        <a onclick="exportJSON(); return false;">📤 导出 JSON</a>
+      </div>
+    </div>
+    <button onclick="openAddRankModal(null, currentTreeType)" class="primary">+ 阶元</button>
+    <button onclick="openCustomRankTypeModal(currentTreeType)">+ 自定义阶元</button>
+      <button onclick="openTagManager()">🏷️ 标签管理</button>
+  </div>
+  <div class="tree-wrap" id="treeWrap"><div id="treeRoot"></div></div>
+  <input type="file" id="importFile" accept=".json" style="display:none" onchange="importJSON(event)">
+</div>
+
+<div class="main" id="mainArea">
+  <div class="main-empty" id="emptyState">
+    <div class="big">🌿</div>
+    <div>点击左侧分类树查看内容</div>
+    <div style="margin-top:0.5rem;font-size:0.8rem;color:var(--muted)">
+      开启 <code>编辑模式</code> 可添加、编辑、拖拽
+    </div>
+  </div>
+  <div id="mainContent" style="display:none;flex:1;"></div>
+</div>
+
+<div class="modal-overlay" id="genericModal">
+  <div class="modal" id="modalContainer">
+    <button class="modal-close" onclick="closeModal()">&times;</button>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================================================
+   预建分类学树数据（精简版，只保留主要类群作为种子；完整数据通过外部 JSON 加载）
+   ============================================================ */
+const SEED_TAXON_TREE = {
+  '维管植物门': { latin: 'Tracheophyta', classes: {
+    '木兰纲': { latin: 'Magnoliopsida', orders: {
+      '禾本目': { latin: 'Poales', families: [
+        {cn:'禾本科',latin:'Poaceae'},{cn:'莎草科',latin:'Cyperaceae'},{cn:'凤梨科',latin:'Bromeliaceae'},
+        {cn:'灯芯草科',latin:'Juncaceae'},{cn:'香蒲科',latin:'Typhaceae'},{cn:'黄眼草科',latin:'Xyridaceae'},
+        {cn:'帚灯草科',latin:'Restionaceae'},{cn:'谷精草科',latin:'Eriocaulaceae'},{cn:'须叶藤科',latin:'Flagellariaceae'},
+        {cn:'花水藓科',latin:'Mayacaceae'}
+      ]},
+      '川续断目': { latin: 'Dipsacales', families: [{cn:'忍冬科',latin:'Caprifoliaceae'},{cn:'荚蒾科',latin:'Viburnaceae'}] },
+      '锦葵目': { latin: 'Malvales', families: [
+        {cn:'锦葵科',latin:'Malvaceae'},{cn:'瑞香科',latin:'Thymelaeaceae'},{cn:'龙脑香科',latin:'Dipterocarpaceae'},
+        {cn:'红木科',latin:'Bixaceae'},{cn:'半日花科',latin:'Cistaceae'}
+      ]},
+      '豆目': { latin: 'Fabales', families: [{cn:'豆科',latin:'Fabaceae'},{cn:'远志科',latin:'Polygalaceae'},{cn:'海人树科',latin:'Surianaceae'}] },
+      '金虎尾目': { latin: 'Malpighiales', families: [
+        {cn:'大戟科',latin:'Euphorbiaceae'},{cn:'叶下珠科',latin:'Phyllanthaceae'},{cn:'西番莲科',latin:'Passifloraceae'},
+        {cn:'堇菜科',latin:'Violaceae'},{cn:'杨柳科',latin:'Salicaceae'},{cn:'亚麻科',latin:'Linaceae'},
+        {cn:'金虎尾科',latin:'Malpighiaceae'},{cn:'沟繁缕科',latin:'Elatinaceae'},{cn:'红树科',latin:'Rhizophoraceae'},
+        {cn:'红厚壳科',latin:'Calophyllaceae'},{cn:'金莲木科',latin:'Ochnaceae'},{cn:'川苔草科',latin:'Podostemaceae'},
+        {cn:'毒鼠子科',latin:'Dichapetalaceae'},{cn:'古柯科',latin:'Erythroxylaceae'},{cn:'藤黄科',latin:'Clusiaceae'},
+        {cn:'金丝桃科',latin:'Hypericaceae'},{cn:'蚌壳木科',latin:'Peraceae'},{cn:'核果木科',latin:'Putranjivaceae'},
+        {cn:'黏木科',latin:'Ixonanthaceae'},{cn:'青钟麻科',latin:'Achariaceae'},{cn:'小盘木科',latin:'Pandaceae'},
+        {cn:'大花草科',latin:'Rafflesiaceae'},{cn:'安神木科',latin:'Centroplacaceae'}
+      ]},
+      '天门冬目': { latin: 'Asparagales', families: [
+        {cn:'兰科',latin:'Orchidaceae'},{cn:'天门冬科',latin:'Asparagaceae'},{cn:'石蒜科',latin:'Amaryllidaceae'},
+        {cn:'阿福花科',latin:'Asphodelaceae'},{cn:'鸢尾科',latin:'Iridaceae'},{cn:'仙茅科',latin:'Hypoxidaceae'},
+        {cn:'鸢尾蒜科',latin:'Ixioliriaceae'}
+      ]},
+      '菊目': { latin: 'Asterales', families: [
+        {cn:'菊科',latin:'Asteraceae'},{cn:'桔梗科',latin:'Campanulaceae'},{cn:'草海桐科',latin:'Goodeniaceae'},
+        {cn:'睡菜科',latin:'Menyanthaceae'},{cn:'五膜草科',latin:'Pentaphragmataceae'},{cn:'花柱草科',latin:'Stylidiaceae'}
+      ]},
+      '露兜树目': { latin: 'Pandanales', families: [
+        {cn:'翡若翠科',latin:'Velloziaceae'},{cn:'百部科',latin:'Stemonaceae'},{cn:'露兜树科',latin:'Pandanaceae'},
+        {cn:'霉草科',latin:'Triuridaceae'}
+      ]},
+      '石竹目': { latin: 'Caryophyllales', families: [
+        {cn:'白花丹科',latin:'Plumbaginaceae'},{cn:'石竹科',latin:'Caryophyllaceae'},{cn:'苋科',latin:'Amaranthaceae'},
+        {cn:'茅膏菜科',latin:'Droseraceae'},{cn:'钩枝藤科',latin:'Ancistrocladaceae'},{cn:'蓼科',latin:'Polygonaceae'},
+        {cn:'紫茉莉科',latin:'Nyctaginaceae'},{cn:'仙人掌科',latin:'Cactaceae'},{cn:'瓣鳞花科',latin:'Frankeniaceae'},
+        {cn:'针晶粟草科',latin:'Gisekiaceae'},{cn:'粟米草科',latin:'Molluginaceae'},{cn:'柽柳科',latin:'Tamaricaceae'},
+        {cn:'猪笼草科',latin:'Nepenthaceae'},{cn:'蒜香草科',latin:'Petiveriaceae'},{cn:'商陆科',latin:'Phytolaccaceae'},
+        {cn:'马齿苋科',latin:'Portulacaceae'},{cn:'番杏科',latin:'Aizoaceae'},{cn:'土人参科',latin:'Talinaceae'},
+        {cn:'落葵科',latin:'Basellaceae'}
+      ]},
+      '唇形目': { latin: 'Lamiales', families: [
+        {cn:'爵床科',latin:'Acanthaceae'},{cn:'唇形科',latin:'Lamiaceae'},{cn:'车前科',latin:'Plantaginaceae'},
+        {cn:'列当科',latin:'Orobanchaceae'},{cn:'苦苣苔科',latin:'Gesneriaceae'},{cn:'紫葳科',latin:'Bignoniaceae'},
+        {cn:'玄参科',latin:'Scrophulariaceae'},{cn:'木犀科',latin:'Oleaceae'},{cn:'母草科',latin:'Linderniaceae'},
+        {cn:'角胡麻科',latin:'Martyniaceae'},{cn:'泡桐科',latin:'Paulowniaceae'},{cn:'透骨草科',latin:'Phrymaceae'},
+        {cn:'马鞭草科',latin:'Verbenaceae'},{cn:'通泉草科',latin:'Mazaceae'},{cn:'芝麻科',latin:'Pedaliaceae'},
+        {cn:'狸藻科',latin:'Lentibulariaceae'},{cn:'美丽桐科',latin:'Wightiaceae'},{cn:'香茜科',latin:'Carlemanniaceae'}
+      ]},
+      '无患子目': { latin: 'Sapindales', families: [
+        {cn:'无患子科',latin:'Sapindaceae'},{cn:'芸香科',latin:'Rutaceae'},{cn:'楝科',latin:'Meliaceae'},
+        {cn:'苦木科',latin:'Simaroubaceae'},{cn:'漆树科',latin:'Anacardiaceae'},{cn:'橄榄科',latin:'Burseraceae'},
+        {cn:'白刺科',latin:'Nitrariaceae'},{cn:'熏倒牛科',latin:'Biebersteiniaceae'}
+      ]},
+      '十字花目': { latin: 'Brassicales', families: [
+        {cn:'十字花科',latin:'Brassicaceae'},{cn:'白花菜科',latin:'Cleomaceae'},{cn:'刺茉莉科',latin:'Salvadoraceae'},
+        {cn:'木犀草科',latin:'Resedaceae'},{cn:'叠珠树科',latin:'Akaniaceae'},{cn:'山柑科',latin:'Capparaceae'},
+        {cn:'番木瓜科',latin:'Caricaceae'},{cn:'辣木科',latin:'Moringaceae'},{cn:'旱金莲科',latin:'Tropaeolaceae'}
+      ]},
+      '龙胆目': { latin: 'Gentianales', families: [
+        {cn:'夹竹桃科',latin:'Apocynaceae'},{cn:'茜草科',latin:'Rubiaceae'},{cn:'龙胆科',latin:'Gentianaceae'},
+        {cn:'马钱科',latin:'Loganiaceae'},{cn:'钩吻科',latin:'Gelsemiaceae'}
+      ]},
+      '蔷薇目': { latin: 'Rosales', families: [
+        {cn:'蔷薇科',latin:'Rosaceae'},{cn:'桑科',latin:'Moraceae'},{cn:'鼠李科',latin:'Rhamnaceae'},
+        {cn:'大麻科',latin:'Cannabaceae'},{cn:'荨麻科',latin:'Urticaceae'},{cn:'胡颓子科',latin:'Elaeagnaceae'},
+        {cn:'榆科',latin:'Ulmaceae'}
+      ]},
+      '毛茛目': { latin: 'Ranunculales', families: [
+        {cn:'毛茛科',latin:'Ranunculaceae'},{cn:'罂粟科',latin:'Papaveraceae'},{cn:'木通科',latin:'Lardizabalaceae'},
+        {cn:'防己科',latin:'Menispermaceae'},{cn:'小檗科',latin:'Berberidaceae'},{cn:'星叶草科',latin:'Circaeasteraceae'},
+        {cn:'领春木科',latin:'Eupteleaceae'}
+      ]},
+      '菖蒲目': { latin: 'Acorales', families: [{cn:'菖蒲科',latin:'Acoraceae'}] },
+      '伞形目': { latin: 'Apiales', families: [
+        {cn:'伞形科',latin:'Apiaceae'},{cn:'五加科',latin:'Araliaceae'},{cn:'海桐科',latin:'Pittosporaceae'},
+        {cn:'鞘柄木科',latin:'Torricelliaceae'}
+      ]},
+      '杜鹃花目': { latin: 'Ericales', families: [
+        {cn:'猕猴桃科',latin:'Actinidiaceae'},{cn:'五列木科',latin:'Pentaphylacaceae'},{cn:'报春花科',latin:'Primulaceae'},
+        {cn:'杜鹃花科',latin:'Ericaceae'},{cn:'安息香科',latin:'Styracaceae'},{cn:'山茶科',latin:'Theaceae'},
+        {cn:'岩梅科',latin:'Diapensiaceae'},{cn:'玉蕊科',latin:'Lecythidaceae'},{cn:'山榄科',latin:'Sapotaceae'},
+        {cn:'桤叶树科',latin:'Clethraceae'},{cn:'花荵科',latin:'Polemoniaceae'},{cn:'山矾科',latin:'Symplocaceae'},
+        {cn:'柿科',latin:'Ebenaceae'},{cn:'凤仙花科',latin:'Balsaminaceae'},{cn:'帽蕊草科',latin:'Mitrastemonaceae'},
+        {cn:'肋果茶科',latin:'Sladeniaceae'}
+      ]},
+      '紫草目': { latin: 'Boraginales', families: [{cn:'紫草科',latin:'Boraginaceae'}] },
+      '樟目': { latin: 'Laurales', families: [
+        {cn:'樟科',latin:'Lauraceae'},{cn:'蜡梅科',latin:'Calycanthaceae'},{cn:'莲叶桐科',latin:'Hernandiaceae'}
+      ]},
+      '葫芦目': { latin: 'Cucurbitales', families: [
+        {cn:'葫芦科',latin:'Cucurbitaceae'},{cn:'秋海棠科',latin:'Begoniaceae'},{cn:'马桑科',latin:'Coriariaceae'},
+        {cn:'四数木科',latin:'Tetramelaceae'}
+      ]},
+      '酢浆草目': { latin: 'Oxalidales', families: [
+        {cn:'牛栓藤科',latin:'Connaraceae'},{cn:'酢浆草科',latin:'Oxalidaceae'},{cn:'杜英科',latin:'Elaeocarpaceae'}
+      ]},
+      '泽泻目': { latin: 'Alismatales', families: [
+        {cn:'天南星科',latin:'Araceae'},{cn:'泽泻科',latin:'Alismataceae'},{cn:'水蕹科',latin:'Aponogetonaceae'},
+        {cn:'水鳖科',latin:'Hydrocharitaceae'},{cn:'花蔺科',latin:'Butomaceae'},{cn:'丝粉藻科',latin:'Cymodoceaceae'},
+        {cn:'大叶藻科',latin:'Zosteraceae'},{cn:'海神草科',latin:'Posidoniaceae'},{cn:'眼子菜科',latin:'Potamogetonaceae'},
+        {cn:'川蔓藻科',latin:'Ruppiaceae'},{cn:'冰沼草科',latin:'Scheuchzeriaceae'},{cn:'岩菖蒲科',latin:'Tofieldiaceae'},
+        {cn:'水麦冬科',latin:'Juncaginaceae'}
+      ]},
+      '山茱萸目': { latin: 'Cornales', families: [
+        {cn:'山茱萸科',latin:'Cornaceae'},{cn:'蓝果树科',latin:'Nyssaceae'},{cn:'绣球科',latin:'Hydrangeaceae'}
+      ]},
+      '木兰目': { latin: 'Magnoliales', families: [
+        {cn:'木兰科',latin:'Magnoliaceae'},{cn:'番荔枝科',latin:'Annonaceae'},{cn:'肉豆蔻科',latin:'Myristicaceae'}
+      ]},
+      '薯蓣目': { latin: 'Dioscoreales', families: [
+        {cn:'沼金花科',latin:'Nartheciaceae'},{cn:'薯蓣科',latin:'Dioscoreaceae'},{cn:'水玉簪科',latin:'Burmanniaceae'}
+      ]},
+      '茄目': { latin: 'Solanales', families: [
+        {cn:'茄科',latin:'Solanaceae'},{cn:'旋花科',latin:'Convolvulaceae'},{cn:'田基麻科',latin:'Hydroleaceae'},
+        {cn:'楔瓣花科',latin:'Sphenocleaceae'}
+      ]},
+      '桃金娘目': { latin: 'Myrtales', families: [
+        {cn:'野牡丹科',latin:'Melastomataceae'},{cn:'千屈菜科',latin:'Lythraceae'},{cn:'使君子科',latin:'Combretaceae'},
+        {cn:'桃金娘科',latin:'Myrtaceae'},{cn:'柳叶菜科',latin:'Onagraceae'},{cn:'隐翼木科',latin:'Crypteroniaceae'}
+      ]},
+      '壳斗目': { latin: 'Fagales', families: [
+        {cn:'桦木科',latin:'Betulaceae'},{cn:'胡桃科',latin:'Juglandaceae'},{cn:'壳斗科',latin:'Fagaceae'},
+        {cn:'木麻黄科',latin:'Casuarinaceae'},{cn:'杨梅科',latin:'Myricaceae'}
+      ]},
+      '虎耳草目': { latin: 'Saxifragales', families: [
+        {cn:'蕈树科',latin:'Altingiaceae'},{cn:'虎耳草科',latin:'Saxifragaceae'},{cn:'景天科',latin:'Crassulaceae'},
+        {cn:'连香树科',latin:'Cercidiphyllaceae'},{cn:'金缕梅科',latin:'Hamamelidaceae'},{cn:'锁阳科',latin:'Cynomoriaceae'},
+        {cn:'虎皮楠科',latin:'Daphniphyllaceae'},{cn:'小二仙草科',latin:'Haloragaceae'},{cn:'鼠刺科',latin:'Iteaceae'},
+        {cn:'芍药科',latin:'Paeoniaceae'},{cn:'扯根菜科',latin:'Penthoraceae'},{cn:'茶藨子科',latin:'Grossulariaceae'}
+      ]},
+      '百合目': { latin: 'Liliales', families: [
+        {cn:'百合科',latin:'Liliaceae'},{cn:'藜芦科',latin:'Melanthiaceae'},{cn:'秋水仙科',latin:'Colchicaceae'},
+        {cn:'白玉簪科',latin:'Corsiaceae'},{cn:'菝葜科',latin:'Smilacaceae'}
+      ]},
+      '鸭跖草目': { latin: 'Commelinales', families: [
+        {cn:'鸭跖草科',latin:'Commelinaceae'},{cn:'田葱科',latin:'Philydraceae'},{cn:'雨久花科',latin:'Pontederiaceae'}
+      ]},
+      '葡萄目': { latin: 'Vitales', families: [{cn:'葡萄科',latin:'Vitaceae'}] },
+      '檀香目': { latin: 'Santalales', families: [
+        {cn:'兜帽果科',latin:'Aptandraceae'},{cn:'檀香科',latin:'Santalaceae'},{cn:'蛇菰科',latin:'Balanophoraceae'},
+        {cn:'桑寄生科',latin:'Loranthaceae'},{cn:'山柚子科',latin:'Opiliaceae'},{cn:'铁青树科',latin:'Olacaceae'},
+        {cn:'海檀木科',latin:'Ximeniaceae'},{cn:'青皮木科',latin:'Schoepfiaceae'},{cn:'赤苍藤科',latin:'Erythropalaceae'}
+      ]},
+      '棕榈目': { latin: 'Arecales', families: [{cn:'棕榈科',latin:'Arecaceae'}] },
+      '胡椒目': { latin: 'Piperales', families: [
+        {cn:'马兜铃科',latin:'Aristolochiaceae'},{cn:'三白草科',latin:'Saururaceae'},{cn:'胡椒科',latin:'Piperaceae'}
+      ]},
+      '卫矛目': { latin: 'Celastrales', families: [
+        {cn:'卫矛科',latin:'Celastraceae'},{cn:'梅花草科',latin:'Parnassiaceae'}
+      ]},
+      '丝缨花目': { latin: 'Garryales', families: [
+        {cn:'丝缨花科',latin:'Garryaceae'},{cn:'杜仲科',latin:'Eucommiaceae'}
+      ]},
+      '水螅花目': { latin: 'Metteniusales', families: [{cn:'水螅花科',latin:'Metteniusaceae'}] },
+      '金粟兰目': { latin: 'Chloranthales', families: [{cn:'金粟兰科',latin:'Chloranthaceae'}] },
+      '金鱼藻目': { latin: 'Ceratophyllales', families: [{cn:'金鱼藻科',latin:'Ceratophyllaceae'}] },
+      '五桠果目': { latin: 'Dilleniales', families: [{cn:'五桠果科',latin:'Dilleniaceae'}] },
+      '腺椒树目': { latin: 'Huerteales', families: [
+        {cn:'十齿花科',latin:'Dipentodontaceae'},{cn:'瘿椒树科',latin:'Tapisciaceae'}
+      ]},
+      '牻牛儿苗目': { latin: 'Geraniales', families: [{cn:'牻牛儿苗科',latin:'Geraniaceae'}] },
+      '缨子木目': { latin: 'Crossosomatales', families: [
+        {cn:'省沽油科',latin:'Staphyleaceae'},{cn:'旌节花科',latin:'Stachyuraceae'}
+      ]},
+      '茶茱萸目': { latin: 'Icacinales', families: [{cn:'茶茱萸科',latin:'Icacinaceae'}] },
+      '木兰藤目': { latin: 'Austrobaileyales', families: [{cn:'五味子科',latin:'Schisandraceae'}] },
+      '黄杨目': { latin: 'Buxales', families: [{cn:'黄杨科',latin:'Buxaceae'}] },
+      '睡莲目': { latin: 'Nymphaeales', families: [
+        {cn:'莼菜科',latin:'Cabombaceae'},{cn:'睡莲科',latin:'Nymphaeaceae'}
+      ]},
+      '山龙眼目': { latin: 'Proteales', families: [
+        {cn:'山龙眼科',latin:'Proteaceae'},{cn:'清风藤科',latin:'Sabiaceae'},{cn:'莲科',latin:'Nelumbonaceae'},
+        {cn:'悬铃木科',latin:'Platanaceae'}
+      ]},
+      '昆栏树目': { latin: 'Trochodendrales', families: [{cn:'昆栏树科',latin:'Trochodendraceae'}] },
+      '蒺藜目': { latin: 'Zygophyllales', families: [{cn:'蒺藜科',latin:'Zygophyllaceae'}] },
+      '南鼠刺目': { latin: 'Escalloniales', families: [{cn:'南鼠刺科',latin:'Escalloniaceae'}] },
+      '无叶莲目': { latin: 'Petrosaviales', families: [{cn:'无叶莲科',latin:'Petrosaviaceae'}] },
+      '姜目': { latin: 'Zingiberales', families: [
+        {cn:'姜科',latin:'Zingiberaceae'},{cn:'竹芋科',latin:'Marantaceae'},{cn:'美人蕉科',latin:'Cannaceae'},
+        {cn:'芭蕉科',latin:'Musaceae'},{cn:'闭鞘姜科',latin:'Costaceae'},{cn:'兰花蕉科',latin:'Lowiaceae'},
+        {cn:'鹤望兰科',latin:'Strelitziaceae'}
+      ]},
+      '冬青目': { latin: 'Aquifoliales', families: [
+        {cn:'冬青科',latin:'Aquifoliaceae'},{cn:'心翼果科',latin:'Cardiopteridaceae'},{cn:'青荚叶科',latin:'Helwingiaceae'},
+        {cn:'粗丝木科',latin:'Stemonuraceae'}
+      ]}
+    }},
+    '松纲': { latin: 'Pinopsida', orders: {
+      '松目': { latin: 'Pinales', families: [{cn:'松科',latin:'Pinaceae'}] },
+      '柏目': { latin: 'Cupressales', families: [
+        {cn:'柏科',latin:'Cupressaceae'},{cn:'红豆杉科',latin:'Taxaceae'},{cn:'三尖杉科',latin:'Cephalotaxaceae'}
+      ]},
+      '南洋杉目': { latin: 'Araucariales', families: [
+        {cn:'南洋杉科',latin:'Araucariaceae'},{cn:'罗汉松科',latin:'Podocarpaceae'}
+      ]},
+      '苏铁目': { latin: 'Cycadales', families: [{cn:'苏铁科',latin:'Cycadaceae'}] },
+      '银杏目': { latin: 'Ginkgoales', families: [{cn:'银杏科',latin:'Ginkgoaceae'}] },
+      '麻黄目': { latin: 'Ephedrales', families: [{cn:'麻黄科',latin:'Ephedraceae'}] },
+      '买麻藤目': { latin: 'Gnetales', families: [{cn:'买麻藤科',latin:'Gnetaceae'}] },
+      '金松目': { latin: 'Sciadopityales', families: [{cn:'金松科',latin:'Sciadopityaceae'}] }
+    }},
+    '木贼纲': { latin: 'Equisetopsida', orders: {
+      '膜蕨目': { latin: 'Hymenophyllales', families: [{cn:'膜蕨科',latin:'Hymenophyllaceae'}] },
+      '水龙骨目': { latin: 'Polypodiales', families: [
+        {cn:'凤尾蕨科',latin:'Pteridaceae'},{cn:'冷蕨科',latin:'Cystopteridaceae'},{cn:'金星蕨科',latin:'Thelypteridaceae'},
+        {cn:'蹄盖蕨科',latin:'Athyriaceae'},{cn:'鳞毛蕨科',latin:'Dryopteridaceae'},{cn:'骨碎补科',latin:'Davalliaceae'},
+        {cn:'水龙骨科',latin:'Polypodiaceae'},{cn:'爬树蕨科',latin:'Arthropteridaceae'},{cn:'铁角蕨科',latin:'Aspleniaceae'},
+        {cn:'乌毛蕨科',latin:'Blechnaceae'},{cn:'翼囊蕨科',latin:'Didymochlaenaceae'},{cn:'肠蕨科',latin:'Diplaziopsidaceae'},
+        {cn:'肿足蕨科',latin:'Hypodematiaceae'},{cn:'鳞始蕨科',latin:'Lindsaeaceae'},{cn:'藤蕨科',latin:'Lomariopsidaceae'},
+        {cn:'肾蕨科',latin:'Nephrolepidaceae'},{cn:'蓧蕨科',latin:'Oleandraceae'},{cn:'球子蕨科',latin:'Onocleaceae'},
+        {cn:'牙蕨科',latin:'Pteridryaceae'},{cn:'轴果蕨科',latin:'Rhachidosoraceae'},{cn:'三叉蕨科',latin:'Tectariaceae'},
+        {cn:'岩蕨科',latin:'Woodsiaceae'}
+      ]},
+      '莎草蕨目': { latin: 'Schizaeales', families: [
+        {cn:'莎草蕨科',latin:'Schizaeaceae'},{cn:'海金沙科',latin:'Lygodiaceae'}
+      ]},
+      '桫椤目': { latin: 'Cyatheales', families: [
+        {cn:'桫椤科',latin:'Cyatheaceae'},{cn:'金毛狗科',latin:'Cibotiaceae'},{cn:'蚌壳蕨科',latin:'Dicksoniaceae'},
+        {cn:'瘤足蕨科',latin:'Plagiogyriaceae'}
+      ]},
+      '合囊蕨目': { latin: 'Marattiales', families: [{cn:'合囊蕨科',latin:'Marattiaceae'}] },
+      '瓶尔小草目': { latin: 'Ophioglossales', families: [{cn:'瓶尔小草科',latin:'Ophioglossaceae'}] },
+      '槐叶蘋目': { latin: 'Salviniales', families: [
+        {cn:'槐叶蘋科',latin:'Salviniaceae'},{cn:'蘋科',latin:'Marsileaceae'}
+      ]},
+      '紫萁目': { latin: 'Osmundales', families: [{cn:'紫萁科',latin:'Osmundaceae'}] },
+      '木贼目': { latin: 'Equisetales', families: [{cn:'木贼科',latin:'Equisetaceae'}] },
+      '松叶蕨目': { latin: 'Psilotales', families: [{cn:'松叶蕨科',latin:'Psilotaceae'}] },
+      '里白目': { latin: 'Gleicheniales', families: [
+        {cn:'里白科',latin:'Gleicheniaceae'},{cn:'双扇蕨科',latin:'Dipteridaceae'}
+      ]},
+      '碗蕨目': { latin: 'Dennstaedtiales', families: [{cn:'碗蕨科',latin:'Dennstaedtiaceae'}] }
+    }},
+    '石松纲': { latin: 'Lycopodiopsida', orders: {
+      '石松目': { latin: 'Lycopodiales', families: [{cn:'石松科',latin:'Lycopodiaceae'}] },
+      '卷柏目': { latin: 'Selaginellales', families: [{cn:'卷柏科',latin:'Selaginellaceae'}] },
+      '水韭目': { latin: 'Isoetales', families: [{cn:'水韭科',latin:'Isoetaceae'}] }
+    }}
+  }}
+};
+
+const PREBUILD_LANG_TREE_TOP = [
+  '汉藏语系', '印欧语系', '南亚语系', '南岛语系',
+  '阿尔泰语系', '朝鲜语系', '日本语系', '其他'
+];
+
+const STANDARD_RANKS = ['界','门','纲','目','科','属','种'];
+const RANK_ORDER = { '界':0, '门':1, '纲':2, '目':3, '科':4, '属':5, '种':6 };
+const STANDARD_LANG_RANKS = ['语系','语族','语言','方言','土语'];
+const LANG_RANK_ORDER = { '语系':0, '语族':1, '语言':2, '方言':3, '土语':4 };
+
+function isUprightRank(rankName) {
+  return ['界','门','纲','目','科','亚门','亚纲','亚目','亚科'].includes(rankName);
+}
+
+const DB_NAME = 'dhi_ethno_v2', DB_VER = 1;
+let db = null;
+let nodes = [];
+let langNodes = [];
+let meta = {};
+let currentTreeType = 'taxon';
+let editMode = false;
+let currentSelection = null;
+let currentView = 'content';
+let viewMode = 'card';
+let expandedNodes = new Set();
+let expandedLangNodes = new Set();
+let treeSearchQuery = '';
+let sortables = [];
+let modalContext = null;
+let REGION_DATA = null;
+let regionLoadPromise = null;
+let currentSpeciesForm = null;
+let currentAdvSearch = null;
+let currentIndexName = null;
+let indexSearchQuery = '';
+let treeSortMode = localStorage.getItem('dhi_tree_sort') || 'pinyin';
+
+function openDB() {
+  return Promise.resolve();
+}
+
+function lsGet(key, fallback) {
+  try {
+    const v = localStorage.getItem(key);
+    return v ? JSON.parse(v) : fallback;
+  } catch (e) {
+    console.warn('localStorage 读取失败：' + key, e);
+    return fallback;
+  }
+}
+function lsSet(key, value) {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch (e) {
+    console.warn('localStorage 写入失败：' + key, e);
+    toast('存储空间不足或浏览器拒绝写入', true);
+  }
+}
+
+function dbPut(store, obj) {
+  if (store === 'nodes') {
+    const list = lsGet('dhi_nodes', []);
+    const idx = list.findIndex(x => x.id === obj.id);
+    if (idx >= 0) list[idx] = obj; else list.push(obj);
+    lsSet('dhi_nodes', list);
+    return Promise.resolve();
+  }
+  if (store === 'langNodes') {
+    const list = lsGet('dhi_lang_nodes', []);
+    const idx = list.findIndex(x => x.id === obj.id);
+    if (idx >= 0) list[idx] = obj; else list.push(obj);
+    lsSet('dhi_lang_nodes', list);
+    return Promise.resolve();
+  }
+  if (store === 'meta') {
+    const map = lsGet('dhi_meta', {});
+    map[obj.key] = obj.value;
+    lsSet('dhi_meta', map);
+    return Promise.resolve();
+  }
+  if (store === 'regionCache') {
+    lsSet('dhi_region_cache', obj.value);
+    return Promise.resolve();
+  }
+  return Promise.resolve();
+}
+
+function dbGetAll(store) {
+  if (store === 'nodes') return Promise.resolve(lsGet('dhi_nodes', []));
+  if (store === 'langNodes') return Promise.resolve(lsGet('dhi_lang_nodes', []));
+  if (store === 'meta') {
+    const map = lsGet('dhi_meta', {});
+    return Promise.resolve(Object.entries(map).map(([k, v]) => ({ key: k, value: v })));
+  }
+  if (store === 'regionCache') {
+    const v = lsGet('dhi_region_cache', null);
+    return Promise.resolve(v ? [{ key: 'data', value: v }] : []);
+  }
+  return Promise.resolve([]);
+}
+
+function dbGet(store, key) {
+  if (store === 'regionCache') {
+    const v = lsGet('dhi_region_cache', null);
+    return Promise.resolve(v ? { key: 'data', value: v } : undefined);
+  }
+  return Promise.resolve(undefined);
+}
+
+function dbDelete(store, id) {
+  if (store === 'nodes') {
+    const list = lsGet('dhi_nodes', []).filter(x => x.id !== id);
+    lsSet('dhi_nodes', list);
+    return Promise.resolve();
+  }
+  if (store === 'langNodes') {
+    const list = lsGet('dhi_lang_nodes', []).filter(x => x.id !== id);
+    lsSet('dhi_lang_nodes', list);
+    return Promise.resolve();
+  }
+  return Promise.resolve();
+}
+
+function dbClear(store) {
+  if (store === 'nodes') lsSet('dhi_nodes', []);
+  else if (store === 'langNodes') lsSet('dhi_lang_nodes', []);
+  else if (store === 'meta') lsSet('dhi_meta', {});
+  else if (store === 'regionCache') lsSet('dhi_region_cache', null);
+  return Promise.resolve();
+}
+
+function tx() { return null; }   // 不再使用，保留以防引用
+
+const REGION_CDN = 'https://cdn.jsdelivr.net/npm/china-area-data@5.0.1/data.json';
+async function loadRegionData() {
+  if (REGION_DATA) return REGION_DATA;
+  if (regionLoadPromise) return regionLoadPromise;
+  regionLoadPromise = (async () => {
+    const cached = await dbGet('regionCache', 'data');
+    if (cached && cached.value) { REGION_DATA = cached.value; return REGION_DATA; }
+    try {
+      const resp = await fetch(REGION_CDN);
+      if (!resp.ok) throw new Error('HTTP ' + resp.status);
+      const raw = await resp.json();
+      const provinceMap = raw['86'] || {};
+      const result = {};
+      Object.entries(provinceMap).forEach(([pCode, pName]) => {
+        if (pCode === '710000' || pCode === '810000' || pCode === '820000') return;
+        result[pName] = {};
+        const cityMap = raw[pCode] || {};
+        Object.entries(cityMap).forEach(([cCode, cName]) => {
+          result[pName][cName] = {};
+          const countyMap = raw[cCode] || {};
+          Object.entries(countyMap).forEach(([coCode, coName]) => { result[pName][cName][coName] = coCode; });
+        });
+      });
+      REGION_DATA = result;
+      await dbPut('regionCache', { key: 'data', value: result });
+      return result;
+    } catch (e) {
+      console.warn('省市区数据加载失败', e);
+      REGION_DATA = {};
+      return REGION_DATA;
+    }
+  })();
+  return regionLoadPromise;
+}
+
+function bindGlobalDropdownClose() {
+  document.addEventListener('click', (e) => {
+    const inCombo = e.target.closest('.combo-sm') || e.target.closest('.search-combo')
+      || e.target.closest('.rank-dropdown') || e.target.closest('.tag-combo');
+    if (inCombo) return;
+    document.querySelectorAll('.combo-sm .dropdown-list.open, .search-combo .dropdown-list.open, .tag-combo .tag-dropdown.open').forEach(d => d.classList.remove('open'));
+    document.querySelectorAll('.rank-dropdown').forEach(d => d.style.display = 'none');
+  });
+}
+
+async function init() {
+  await openDB();
+  nodes = await dbGetAll('nodes');
+  langNodes = await dbGetAll('langNodes');
+  const metaArr = await dbGetAll('meta');
+  meta = {};
+  metaArr.forEach(m => { meta[m.key] = m.value; });
+  if (!meta.partsLib) meta.partsLib = [];
+  if (!meta.waysLib) meta.waysLib = [];
+  if (!meta.dishesLib) meta.dishesLib = [];
+  if (!meta.ethnicLib) meta.ethnicLib = [];
+  if (!meta.methodsLib) meta.methodsLib = [];
+
+  if (!nodes.find(n => n.id === 'root')) {
+    const root = { id: 'root', type: 'rank', rankName: '界', cn: '植物界', latin: 'Plantae', parentId: null, children: [], photos: [] };
+    await dbPut('nodes', root);
+    nodes.push(root);
+  }
+  if (!langNodes.find(n => n.id === 'lang_root')) {
+    const langRoot = { id: 'lang_root', type: 'langRoot', rankName: '', cn: '', latin: '', parentId: null, children: [], photos: [] };
+    await dbPut('langNodes', langRoot);
+    langNodes.push(langRoot);
+  }
+
+  if (!nodes.some(n => n.id === 'prebuilt_门_维管植物门')) await prebuildTaxonTree();
+  if (!langNodes.some(n => n.id && n.id.startsWith('prebuilt_lang_'))) await prebuildLangTree();
+
+  applyFontSettings();
+  bindGlobalDropdownClose();
+  renderIndexBar();
+  updateSearchPlaceholder();
+  renderTree();
+  loadRegionData();
+}
+
+async function prebuildTaxonTree() {
+  const root = getNode('root');
+  if (!root) return;
+  if (!root.children) root.children = [];
+  async function buildRank(parentId, rankName, cn, latin) {
+    const id = 'prebuilt_' + rankName + '_' + cn;
+    let node = getNode(id);
+    if (node) {
+      if (node.parentId !== parentId) { node.parentId = parentId; await dbPut('nodes', node); }
+      return id;
+    }
+    node = { id, type: 'rank', rankName, cn, latin, parentId, children: [], photos: [] };
+    await dbPut('nodes', node);
+    nodes.push(node);
+    return id;
+  }
+  for (const [phylumCn, phylumData] of Object.entries(SEED_TAXON_TREE)) {
+    const phylumId = await buildRank('root', '门', phylumCn, phylumData.latin);
+    const phylumNode = getNode(phylumId);
+    if (!phylumNode.children) phylumNode.children = [];
+    for (const [classCn, classData] of Object.entries(phylumData.classes)) {
+      const classId = await buildRank(phylumId, '纲', classCn, classData.latin);
+      const classNode = getNode(classId);
+      if (!classNode.children) classNode.children = [];
+      for (const [orderCn, orderData] of Object.entries(classData.orders)) {
+        const orderId = await buildRank(classId, '目', orderCn, orderData.latin);
+        const orderNode = getNode(orderId);
+        if (!orderNode.children) orderNode.children = [];
+        for (const fam of (orderData.families || [])) {
+          const famId = await buildRank(orderId, '科', fam.cn, fam.latin);
+          if (!orderNode.children.includes(famId)) orderNode.children.push(famId);
+        }
+        await dbPut('nodes', orderNode);
+        if (!classNode.children.includes(orderId)) classNode.children.push(orderId);
+      }
+      await dbPut('nodes', classNode);
+      if (!phylumNode.children.includes(classId)) phylumNode.children.push(classId);
+    }
+    await dbPut('nodes', phylumNode);
+    if (!root.children.includes(phylumId)) root.children.push(phylumId);
+    await dbPut('nodes', root);
+  }
+}
+
+async function prebuildLangTree() {
+  const root = getLangNode('lang_root');
+  if (!root) return;
+  if (!root.children) root.children = [];
+  for (const cn of PREBUILD_LANG_TREE_TOP) {
+    const id = 'prebuilt_lang_语系_' + cn;
+    let node = getLangNode(id);
+    if (node) {
+      if (node.parentId !== 'lang_root') { node.parentId = 'lang_root'; await dbPut('langNodes', node); }
+      if (!root.children.includes(id)) { root.children.push(id); await dbPut('langNodes', root); }
+      continue;
+    }
+    node = { id, type: 'langRank', rankName: '语系', cn, latin: '', parentId: 'lang_root', children: [], photos: [] };
+    await dbPut('langNodes', node);
+    langNodes.push(node);
+    root.children.push(id);
+  }
+  await dbPut('langNodes', root);
+}
+
+function applyFontSettings() {
+  const mode = localStorage.getItem('dhi_font_mode') || 'sans';
+  const size = localStorage.getItem('dhi_font_size') || '17';
+  document.body.classList.toggle('font-mode-sans', mode === 'sans');
+  document.body.classList.toggle('font-mode-serif', mode === 'serif');
+  document.documentElement.style.setProperty('--base-size', size + 'px');
+  const range = document.getElementById('fontSizeRange');
+  if (range) range.value = size;
+  const disp = document.getElementById('fontSizeDisplay');
+  if (disp) disp.textContent = size;
+}
+
+function setFontSize(v) {
+  localStorage.setItem('dhi_font_size', v);
+  document.documentElement.style.setProperty('--base-size', v + 'px');
+  const disp = document.getElementById('fontSizeDisplay');
+  if (disp) disp.textContent = v;
+}
+
+function toggleFontMode() {
+  const cur = localStorage.getItem('dhi_font_mode') || 'sans';
+  const next = cur === 'sans' ? 'serif' : 'sans';
+  localStorage.setItem('dhi_font_mode', next);
+  document.body.classList.toggle('font-mode-sans', next === 'sans');
+  document.body.classList.toggle('font-mode-serif', next === 'serif');
+  toast(next === 'sans' ? '已切换为无衬线' : '已切换为衬线');
+}
+
+function renderIndexBar() {
+  const bar = document.getElementById('indexBar');
+  if (!bar) return;
+  const items = [
+    { id: 'chinese', label: '中文名' },
+    { id: 'latin', label: '学名' },
+    { id: 'common', label: '俗名' },
+    { id: 'part', label: '食用部位' },
+    { id: 'way', label: '食用方式' },
+    { id: 'dish', label: '菜品名' },
+    { id: 'region', label: '地区' },
+    { id: 'ethnic', label: '民族' }
+  ];
+  bar.innerHTML = items.map(it =>
+    `<button class="index-btn" data-index="${it.id}" onclick="switchIndex('${it.id}')">${it.label}</button>`
+  ).join('');
+}
+
+function updateSearchPlaceholder() {
+  const el = document.getElementById('searchInput');
+  if (!el) return;
+  el.placeholder = currentTreeType === 'taxon' ? '搜索分类群、俗名、学名...' : '搜索语言...';
+}
+
+function switchTree(t) {
+  currentTreeType = t;
+  document.querySelectorAll('.tree-switch button').forEach(b => {
+    b.classList.toggle('active', b.dataset.tree === t);
+  });
+  currentSelection = null;
+  treeSearchQuery = '';
+  document.getElementById('searchInput').value = '';
+  updateSearchPlaceholder();
+  renderTree();
+  if (currentView === 'content') {
+    document.getElementById('emptyState').style.display = 'flex';
+    document.getElementById('mainContent').style.display = 'none';
+  }
+}
+
+function getNode(id) { return nodes.find(n => n.id === id); }
+function getLangNode(id) { return langNodes.find(n => n.id === id); }
+function getCurrentTree() { return currentTreeType === 'taxon' ? nodes : langNodes; }
+function getChildren(id) {
+  const n = currentTreeType === 'taxon' ? getNode(id) : getLangNode(id);
+  if (!n) return [];
+  const list = currentTreeType === 'taxon' ? nodes : langNodes;
+  return (n.children || []).map(cid => list.find(x => x.id === cid)).filter(Boolean);
+}
+
+function getPinyinForSort(s) {
+  if (!s) return '';
+  if (typeof pinyinPro !== 'undefined') {
+    try { return pinyinPro.pinyin(s, { toneType: 'none', type: 'array' }).join(''); }
+    catch (e) { return s; }
+  }
+  return s;
+}
+
+function sortTreeChildren(children) {
+  if (treeSortMode === 'none') return children;
+  const copy = children.slice();
+  copy.sort((a, b) => {
+    if (treeSortMode === 'latin') {
+      const la = (a.latin || '').toLowerCase();
+      const lb = (b.latin || '').toLowerCase();
+      if (!la && !lb) return (a.cn || a.chinese || '').localeCompare(b.cn || b.chinese || '', 'zh');
+      if (!la) return 1;
+      if (!lb) return -1;
+      return la.localeCompare(lb);
+    }
+    const na = a.cn || a.chinese || '';
+    const nb = b.cn || b.chinese || '';
+    return getPinyinForSort(na).localeCompare(getPinyinForSort(nb));
+  });
+  return copy;
+}
+
+function setTreeSort(mode) {
+  treeSortMode = mode;
+  localStorage.setItem('dhi_tree_sort', mode);
+  renderTree();
+  toast('已切换为：' + (mode === 'pinyin' ? '按中文拼音' : mode === 'latin' ? '按拉丁字母' : '按添加顺序'));
+}
+
+function expandAncestors(nodeId, treeType) {
+  const isLang = treeType === 'lang';
+  const list = isLang ? langNodes : nodes;
+  const set = isLang ? expandedLangNodes : expandedNodes;
+  const rootId = isLang ? 'lang_root' : 'root';
+  function findPath(currentId, targetId, visited) {
+    if (currentId === targetId) return [currentId];
+    if (visited.has(currentId)) return null;
+    visited.add(currentId);
+    const cur = list.find(n => n.id === currentId);
+    if (!cur) return null;
+    for (const childId of (cur.children || [])) {
+      const path = findPath(childId, targetId, visited);
+      if (path) return [currentId, ...path];
+    }
+    return null;
+  }
+  const path = findPath(rootId, nodeId, new Set());
+  if (path) {
+    path.forEach(id => set.add(id));
+  } else {
+    let cur = list.find(n => n.id === nodeId);
+    while (cur) {
+      set.add(cur.id);
+      cur = cur.parentId ? list.find(n => n.id === cur.parentId) : null;
+    }
+  }
+}
+
+function renderTree() {
+  sortables.forEach(s => s.destroy());
+  sortables = [];
+  const root = document.getElementById('treeRoot');
+  root.innerHTML = '';
+  if (currentTreeType === 'taxon') {
+    const rootNode = getNode('root');
+    if (!rootNode) return;
+    renderTreeNode(root, rootNode, 0);
+  } else {
+    const rootNode = getLangNode('lang_root');
+    if (!rootNode) return;
+    const rootChildren = sortTreeChildren((rootNode.children || []).map(cid => getLangNode(cid)).filter(Boolean));
+    rootChildren.forEach(c => renderLangTreeNode(root, c, 0));
+  }
+}
+
+function renderTreeNode(container, node, depth) {
+  const isExpanded = expandedNodes.has(node.id) || depth === 0;
+  const isActive = currentSelection === node.id && currentTreeType === 'taxon';
+  const children = sortTreeChildren(getChildren(node.id));
+  if (treeSearchQuery && currentTreeType === 'taxon') {
+    const q = treeSearchQuery.toLowerCase();
+    if (!nodeMatchesSearch(node, q)) return;
+  }
+  const nodeDiv = document.createElement('div');
+  nodeDiv.className = 'tree-node';
+  nodeDiv.dataset.nodeId = node.id;
+  const label = document.createElement('div');
+  label.className = 'node-label' + (isActive ? ' active' : '');
+  const hasChildren = children.length > 0;
+  const isSpecies = node.type === 'species';
+  label.innerHTML = `
+    ${editMode ? '<span class="drag-handle" title="拖动">⋮⋮</span>' : ''}
+    <span class="arrow ${isExpanded ? 'open' : ''}">${hasChildren && !isSpecies ? '▶' : ''}</span>
+    <span class="name">${escapeHtml(node.cn || node.chinese || '未命名')}</span>
+    ${node.latin ? `<span class="latin ${isUprightRank(node.rankName) ? 'upright' : ''}">${escapeHtml(node.latin)}</span>` : ''}
+    ${node.rankName && !isSpecies ? `<span class="rank">${escapeHtml(node.rankName)}</span>` : ''}
+    ${hasChildren && isSpecies ? `<span class="count">${children.length}</span>` : (hasChildren ? `<span class="count">${countDescendants(node.id)}</span>` : '')}
+  `;
+  label.onclick = (e) => {
+    if (e.target.closest('.drag-handle')) return;
+    e.stopPropagation();
+    if (hasChildren && !isSpecies) {
+      if (expandedNodes.has(node.id)) expandedNodes.delete(node.id);
+      else expandedNodes.add(node.id);
+      renderTree();
+    }
+    currentSelection = node.id;
+    currentView = 'content';
+    renderTree();
+    renderMain();
+  };
+  nodeDiv.appendChild(label);
+  if (isExpanded && hasChildren) {
+    const childContainer = document.createElement('div');
+    childContainer.className = 'tree-children';
+    childContainer.dataset.parentId = node.id;
+    nodeDiv.appendChild(childContainer);
+    const rankChildren = children.filter(c => c.type === 'rank');
+    const spChildren = children.filter(c => c.type !== 'rank');
+    rankChildren.forEach(c => renderTreeNode(childContainer, c, depth + 1));
+    spChildren.forEach(c => renderTreeNode(childContainer, c, depth + 1));
+    if (editMode) bindSortable(childContainer, node, 'taxon');
+  }
+  container.appendChild(nodeDiv);
+}
+
+function renderLangTreeNode(container, node, depth) {
+  const isExpanded = expandedLangNodes.has(node.id) || depth === 0;
+  const isActive = currentSelection === node.id && currentTreeType === 'lang';
+  const children = sortTreeChildren((node.children || []).map(cid => getLangNode(cid)).filter(Boolean));
+  if (treeSearchQuery && currentTreeType === 'lang') {
+    const q = treeSearchQuery.toLowerCase();
+    if (!langNodeMatchesSearch(node, q)) return;
+  }
+  const nodeDiv = document.createElement('div');
+  nodeDiv.className = 'tree-node';
+  nodeDiv.dataset.nodeId = node.id;
+  const label = document.createElement('div');
+  label.className = 'node-label' + (isActive ? ' active' : '');
+  const hasChildren = children.length > 0;
+  label.innerHTML = `
+    ${editMode ? '<span class="drag-handle" title="拖动">⋮⋮</span>' : ''}
+    <span class="arrow ${isExpanded ? 'open' : ''}">${hasChildren ? '▶' : ''}</span>
+    <span class="name">${escapeHtml(node.cn || '未命名')}</span>
+    ${node.rankName ? `<span class="rank">${escapeHtml(node.rankName)}</span>` : ''}
+    ${hasChildren ? `<span class="count">${countLangDescendants(node.id)}</span>` : ''}
+  `;
+  label.onclick = (e) => {
+    if (e.target.closest('.drag-handle')) return;
+    e.stopPropagation();
+    if (hasChildren) {
+      if (expandedLangNodes.has(node.id)) expandedLangNodes.delete(node.id);
+      else expandedLangNodes.add(node.id);
+      renderTree();
+    }
+    currentSelection = node.id;
+    currentView = 'content';
+    renderTree();
+    renderMain();
+  };
+  nodeDiv.appendChild(label);
+  if (isExpanded && hasChildren) {
+    const childContainer = document.createElement('div');
+    childContainer.className = 'tree-children';
+    childContainer.dataset.parentId = node.id;
+    nodeDiv.appendChild(childContainer);
+    children.forEach(c => renderLangTreeNode(childContainer, c, depth + 1));
+    if (editMode) bindSortable(childContainer, node, 'lang');
+  }
+  container.appendChild(nodeDiv);
+}
+
+function countDescendants(id) {
+  const children = getChildren(id);
+  let n = children.length;
+  children.forEach(c => { n += countDescendants(c.id); });
+  return n;
+}
+function countLangDescendants(id) {
+  const n = getLangNode(id);
+  if (!n) return 0;
+  let count = (n.children || []).length;
+  (n.children || []).forEach(cid => { count += countLangDescendants(cid); });
+  return count;
+}
+function nodeMatchesSearch(node, q) {
+  if ((node.cn || '').toLowerCase().includes(q)) return true;
+  if ((node.chinese || '').toLowerCase().includes(q)) return true;
+  if ((node.latin || '').toLowerCase().includes(q)) return true;
+  if ((node.records || []).some(rec => (rec.name || '').toLowerCase().includes(q))) return true;
+  return getChildren(node.id).some(c => nodeMatchesSearch(c, q));
+}
+function langNodeMatchesSearch(node, q) {
+  if ((node.cn || '').toLowerCase().includes(q)) return true;
+  const list = langNodes;
+  return (node.children || []).map(cid => list.find(x => x.id === cid)).filter(Boolean).some(c => langNodeMatchesSearch(c, q));
+}
+
+function scrollTreeToSelected() {
+  if (!currentSelection) return;
+  setTimeout(() => {
+    const treeRoot = document.getElementById('treeRoot');
+    if (!treeRoot) return;
+    const activeEl = treeRoot.querySelector('.node-label.active');
+    if (activeEl) activeEl.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  }, 50);
+}
+
+function onTreeSearch(v) {
+  treeSearchQuery = v;
+  if (!v) {
+    if (currentSelection) {
+      if (currentTreeType === 'taxon') expandedNodes = new Set();
+      else expandedLangNodes = new Set();
+      expandAncestors(currentSelection, currentTreeType);
+    }
+    renderTree();
+    scrollTreeToSelected();
+    return;
+  }
+  const q = v.toLowerCase();
+  if (currentTreeType === 'taxon') {
+    function expandPath(node) {
+      if (nodeMatchesSearch(node, q)) expandedNodes.add(node.id);
+      getChildren(node.id).forEach(expandPath);
+    }
+    expandPath(getNode('root'));
+  } else {
+    function expandLangPath(node) {
+      if (langNodeMatchesSearch(node, q)) expandedLangNodes.add(node.id);
+      const list = langNodes;
+      (node.children || []).map(cid => list.find(x => x.id === cid)).filter(Boolean).forEach(expandLangPath);
+    }
+    const root = getLangNode('lang_root');
+    (root.children || []).map(cid => getLangNode(cid)).filter(Boolean).forEach(expandLangPath);
+  }
+  renderTree();
+  if (currentSelection) scrollTreeToSelected();
+}
+
+function bindSortable(container, parentNode, treeType) {
+  const s = Sortable.create(container, {
+    group: 'taxon-tree-' + treeType, animation: 150, handle: '.drag-handle',
+    draggable: '.tree-node', ghostClass: 'dragging',
+    onEnd: function(evt) {
+      const itemEl = evt.item;
+      const nodeId = itemEl.dataset.nodeId;
+      if (!nodeId) { renderTree(); return; }
+      const list = treeType === 'taxon' ? nodes : langNodes;
+      const dragged = list.find(n => n.id === nodeId);
+      if (!dragged) { renderTree(); return; }
+      const toParentId = evt.to.dataset.parentId;
+      if (!toParentId) { renderTree(); return; }
+      const newParent = list.find(n => n.id === toParentId);
+      const oldParent = list.find(n => n.id === dragged.parentId);
+      if (oldParent && newParent && oldParent.id === newParent.id && evt.oldIndex === evt.newIndex) return;
+
+      let msg = `将「${dragged.cn || dragged.chinese}」移动到「${newParent.cn || newParent.chinese}」下？`;
+      if (oldParent && newParent && oldParent.id !== newParent.id) msg += `\n\n注意：这是跨父节点移动。`;
+      if (treeType === 'lang') msg += `\n\n词条里挂在该语言（及其子语言）下的 langPaths 会同步更新。`;
+      if (!confirm(msg)) { renderTree(); return; }
+
+      const oldPaths = {};
+      if (treeType === 'lang') {
+        function walk(id) {
+          const n = list.find(x => x.id === id);
+          if (!n) return;
+          if (id !== 'lang_root') oldPaths[id] = buildLangPath(id);
+          (n.children || []).forEach(walk);
+        }
+        walk(dragged.id);
+      }
+
+      if (oldParent) {
+        oldParent.children = (oldParent.children || []).filter(id => id !== dragged.id);
+      }
+      if (!newParent.children) newParent.children = [];
+      newParent.children.push(dragged.id);
+      dragged.parentId = newParent.id;
+
+      const store = treeType === 'taxon' ? 'nodes' : 'langNodes';
+      const writes = [];
+      if (oldParent) writes.push(dbPut(store, oldParent));
+      writes.push(dbPut(store, newParent));
+      writes.push(dbPut(store, dragged));
+
+      Promise.all(writes).then(async () => {
+        const fresh = await dbGetAll(store);
+        if (treeType === 'taxon') nodes = fresh; else langNodes = fresh;
+
+        if (treeType === 'lang') {
+          const sortedOldPaths = Object.entries(oldPaths).sort((a, b) => b[1].length - a[1].length);
+          let changed = 0;
+          for (const sp of nodes) {
+            if (sp.type !== 'species') continue;
+            let nodeChanged = false;
+            (sp.records || []).forEach(rec => {
+              const lps = rec.langPaths || (rec.langPath ? [rec.langPath] : []);
+              if (!lps.length) return;
+              let localChanged = false;
+              const newPaths = lps.map(lp => {
+                for (const [nid, oldPath] of sortedOldPaths) {
+                  if (lp === oldPath || lp.startsWith(oldPath + ' > ')) {
+                    localChanged = true;
+                    return buildLangPath(nid) + lp.slice(oldPath.length);
+                  }
+                }
+                return lp;
+              });
+              if (localChanged) {
+                rec.langPaths = newPaths;
+                delete rec.langPath;
+                nodeChanged = true;
+              }
+            });
+            if (nodeChanged) {
+              await dbPut('nodes', sp);
+              changed++;
+            }
+          }
+          if (changed > 0) {
+            nodes = await dbGetAll('nodes');
+            renderMain();
+          }
+          toast(changed > 0 ? `已移动，同步了 ${changed} 个词条` : '已移动');
+        } else {
+          toast('已移动');
+        }
+        renderTree();
+      });
+    }
+  });
+  sortables.push(s);
+}
+
+function toggleEditMode() {
+  editMode = !editMode;
+  const btn = document.getElementById('editToggleBtn');
+  btn.classList.toggle('active', editMode);
+  btn.textContent = editMode ? '✓ 编辑模式' : '✎ 编辑模式';
+  document.body.classList.toggle('edit-mode', editMode);
+  renderTree();
+  if (currentSelection) renderMain();
+  toast(editMode ? '编辑模式已开启' : '编辑模式已关闭');
+}
+
+function renderMain() {
+  const emptyState = document.getElementById('emptyState');
+  const mainContent = document.getElementById('mainContent');
+  if (currentView !== 'content' || !currentSelection) {
+    emptyState.style.display = 'flex';
+    mainContent.style.display = 'none';
+    if (currentView !== 'content') renderIndexPage();
+    return;
+  }
+  emptyState.style.display = 'none';
+  mainContent.style.display = 'block';
+  const node = getCurrentTree().find(n => n.id === currentSelection);
+  if (!node) { currentSelection = null; renderMain(); return; }
+  if (currentTreeType === 'taxon') {
+    if (node.type === 'species') renderSpeciesDetail(node);
+    else renderRankView(node);
+  } else {
+    renderLangRankView(node);
+  }
+}
+
+function renderRankView(node) {
+  const children = sortTreeChildren(getChildren(node.id));
+  const rankChildren = children.filter(c => c.type === 'rank');
+  const spChildren = children.filter(c => c.type !== 'rank');
+  const el = document.getElementById('mainContent');
+  const path = buildPath(node.id);
+  el.innerHTML = `
+    <div class="main-header">
+      <div class="title-block">
+        <h2>${escapeHtml(node.cn || '')} ${node.latin ? `<span style="font-family:var(--serif);${isUprightRank(node.rankName) ? '' : 'font-style:italic;'}font-size:1rem;color:var(--muted);font-weight:400">${escapeHtml(node.latin)}</span>` : ''}</h2>
+        <div class="taxon-line">${escapeHtml(path)}</div>
+        <div class="taxon-line" style="margin-top:0.1rem">${rankChildren.length} 个子阶元 · ${spChildren.length} 个物种/词条</div>
+      </div>
+      <div class="actions">
+        ${editMode ? `
+          <button class="mini" onclick="openAddRankModal('${node.id}', 'taxon')">+ 子阶元</button>
+          <button class="mini primary" onclick="openAddSpeciesModal('${node.id}')">+ 物种</button>
+          <button class="mini" onclick="openEditRankNodeModal('${node.id}', 'taxon')">编辑此节点</button>
+        ` : ''}
+        <div class="view-toggle">
+          <button class="${viewMode==='card'?'active':''}" onclick="setViewMode('card')">平铺</button>
+          <button class="${viewMode==='list'?'active':''}" onclick="setViewMode('list')">列表</button>
+          <button class="${viewMode==='detail'?'active':''}" onclick="setViewMode('detail')">详情</button>
+        </div>
+      </div>
+    </div>
+    <div style="margin-bottom:0.95rem">
+      <div style="font-size:0.7rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:0.35rem">图片（第一张为封面）</div>
+      ${editMode ? `<label class="upload-btn">+ 上传图片<input type="file" accept="image/*" multiple onchange="onNodePhotoUpload(event, '${node.id}', 'taxon')"></label>` : ''}
+      <div class="photo-edit-grid" id="nodePhotoGrid_${node.id}"></div>
+    </div>
+    <div class="card-area" id="cardArea"></div>
+  `;
+  renderNodePhotoGrid(node.id, 'taxon');
+  renderCardArea(children);
+}
+
+function renderLangRankView(node) {
+  const children = sortTreeChildren((node.children || []).map(cid => getLangNode(cid)).filter(Boolean));
+  const el = document.getElementById('mainContent');
+  const path = buildLangPath(node.id);
+  const langNodeIds = collectLangDescendantPaths(node.id);
+  const allRecords = [];
+  nodes.forEach(n => {
+    if (n.type !== 'species') return;
+    (n.records || []).forEach(rec => {
+      const norm = normalizeRecord({ ...rec });
+      const lps = norm.langPaths || [];
+      if (!lps.length) return;
+      if (lps.some(lp => langNodeIds.some(p => lp === p || lp.startsWith(p + ' > ')))) {
+        allRecords.push({ node: n, rec: norm });
+      }
+    });
+  });
+
+  const sortedRecords = allRecords.slice().sort((a, b) => {
+    const na = (a.rec.names[0] && a.rec.names[0].text) || a.node.chinese || '';
+    const nb = (b.rec.names[0] && b.rec.names[0].text) || b.node.chinese || '';
+    return getPinyinForSort(na).localeCompare(getPinyinForSort(nb));
+  });
+  const groups = {};
+  sortedRecords.forEach(x => {
+    const nm = (x.rec.names[0] && x.rec.names[0].text) || x.node.chinese || '';
+    const letter = getPinyinInitial(nm);
+    if (!groups[letter]) groups[letter] = [];
+    groups[letter].push(x);
+  });
+  const letters = Object.keys(groups).sort();
+
+  const childList = children.map(c => `
+    <div class="record-list-item" style="padding:0.4rem 0.6rem" onclick="selectNode('${c.id}')">
+      <span class="li-title" style="font-size:0.85rem">${escapeHtml(c.cn)}</span>
+      ${c.rankName ? `<span class="li-latin" style="font-style:normal;font-size:0.7rem">${escapeHtml(c.rankName)}</span>` : ''}
+    </div>
+  `).join('');
+
+  el.innerHTML = `
+    <div class="main-header">
+      <div class="title-block">
+        <h2>${escapeHtml(node.cn || '')}</h2>
+        <div class="taxon-line">${escapeHtml(path)}</div>
+        <div class="taxon-line" style="margin-top:0.1rem">${node.rankName ? node.rankName + ' · ' : ''}${children.length} 个子项 · ${allRecords.length} 条植物俗名记录</div>
+      </div>
+      <div class="actions">
+        ${editMode ? `
+          <button class="mini" onclick="openAddRankModal('${node.id}', 'lang')">+ 子阶元</button>
+          <button class="mini" onclick="openEditLangNodeModal('${node.id}')">编辑此节点</button>
+        ` : ''}
+      </div>
+    </div>
+    <div style="margin-bottom:0.6rem">
+      <div style="font-size:0.7rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:0.35rem">图片（第一张为封面）</div>
+      ${editMode ? `<label class="upload-btn">+ 上传图片<input type="file" accept="image/*" multiple onchange="onNodePhotoUpload(event, '${node.id}', 'lang')"></label>` : ''}
+      <div class="photo-edit-grid" id="nodePhotoGrid_${node.id}"></div>
+    </div>
+    ${allRecords.length ? `
+    <div class="lang-split">
+      <div class="lang-split-left">
+        <div class="lang-split-title">子节点</div>
+        ${children.length ? `<div class="record-list">${childList}</div>` : '<div class="empty" style="padding:0.6rem;font-size:0.75rem">无</div>'}
+      </div>
+      <div class="lang-split-right">
+        <div class="lang-split-title">该语言下的植物俗名</div>
+        ${letters.map(letter => `
+          <div class="dict-group" style="margin-bottom:0.6rem">
+            <div class="dict-letter" style="font-size:0.75rem;padding-bottom:0.15rem;margin-bottom:0.25rem">${escapeHtml(letter)}</div>
+            ${groups[letter].map(({node: sp, rec}) => `
+              <div class="record-list-item" style="padding:0.4rem 0.6rem" onclick="selectNode('${sp.id}')">
+                <span class="li-title" style="font-size:0.85rem">${escapeHtml((rec.names[0] && rec.names[0].text) || sp.chinese || '')}</span>
+                ${sp.latin ? `<span class="li-latin" style="font-size:0.72rem">${escapeHtml(sp.latin)}</span>` : ''}
+                <span class="li-meta" style="font-size:0.7rem">${escapeHtml(sp.chinese || '')}</span>
+              </div>
+            `).join('')}
+          </div>
+        `).join('')}
+      </div>
+    </div>
+    ` : `
+      <div class="lang-split-title" style="margin-top:0.6rem">子节点</div>
+      ${children.length ? `<div class="record-list">${childList}</div>` : '<div class="empty" style="padding:1.2rem">无子节点</div>'}
+    `}
+  `;
+  renderNodePhotoGrid(node.id, 'lang');
+}
+
+
+/* 收集某个语言节点及其所有后代的完整路径（用于匹配 records[].langPath） */
+function collectLangDescendantPaths(rootId) {
+  const result = [];
+  function walk(id) {
+    const n = getLangNode(id);
+    if (!n) return;
+    if (id !== 'lang_root') result.push(buildLangPath(id));
+    (n.children || []).forEach(walk);
+  }
+  walk(rootId);
+  return result;
+}
+
+function renderLangCardArea(children) {
+  const area = document.getElementById('cardArea');
+  if (!area) return;
+  if (!children.length) { area.innerHTML = '<div class="empty"><div class="big">🗣️</div>该语言节点下暂无子项</div>'; return; }
+  area.innerHTML = `<div class="record-grid">${children.map(c => {
+    const photos = c.photos || [];
+    const img = photos.length ? `<img class="card-img" src="${photos[0]}">` : `<div class="card-img placeholder">🗣️ ${escapeHtml(c.rankName || '')}</div>`;
+    return `<div class="record-card" onclick="selectNode('${c.id}')">
+      ${img}
+      <div class="card-body">
+        <div class="card-name">${escapeHtml(c.cn)}</div>
+        <div class="card-meta">${(c.children || []).length ? `<span class="tag">${c.children.length} 子项</span>` : ''}</div>
+      </div>
+    </div>`;
+  }).join('')}</div>`;
+}
+
+function renderCardArea(children) {
+  const area = document.getElementById('cardArea');
+  if (!area) return;
+  if (!children.length) { area.innerHTML = '<div class="empty"><div class="big">🌱</div>该分类下暂无内容</div>'; return; }
+  if (viewMode === 'list') area.innerHTML = `<div class="record-list">${children.map(c => renderListItem(c)).join('')}</div>`;
+  else if (viewMode === 'detail') {
+    const first = children[0];
+    if (first.type === 'species') renderSpeciesDetail(first, true);
+    else renderRankView(first);
+  } else {
+    area.innerHTML = `<div class="record-grid">${children.map(c => renderCard(c)).join('')}</div>`;
+  }
+}
+
+function renderListItem(node) {
+  const isSpecies = node.type === 'species';
+  const children = getChildren(node.id);
+  const meta = isSpecies
+    ? (node.records || []).slice(0, 2).map(r => r.name).filter(Boolean).join(' · ')
+    : `${node.rankName || ''} ${children.length ? '· ' + children.length + ' 子项' : ''}`;
+  return `<div class="record-list-item" onclick="selectNode('${node.id}')">
+    <span class="li-title">${escapeHtml(node.cn || node.chinese || '未命名')}</span>
+    ${node.latin ? `<span class="li-latin ${isUprightRank(node.rankName) ? 'upright' : ''}">${escapeHtml(node.latin)}</span>` : ''}
+    <span class="li-meta">${escapeHtml(meta)}</span>
+  </div>`;
+}
+
+function getSpeciesCover(node) {
+  if (node.coverPhoto) {
+    let exists = false;
+    (node.records || []).forEach(rec => {
+      (rec.usages || []).forEach(u => {
+        (u.ways || []).forEach(w => {
+          if (w.photos && w.photos.includes(node.coverPhoto)) exists = true;
+        });
+      });
+    });
+    if (exists) return node.coverPhoto;
+  }
+  for (const rec of (node.records || [])) {
+    for (const u of (rec.usages || [])) {
+      for (const w of (u.ways || [])) {
+        if (w.photos && w.photos.length) return w.photos[0];
+      }
+    }
+  }
+  return '';
+}
+
+function renderCard(node) {
+  const isSpecies = node.type === 'species';
+  if (!isSpecies) {
+    const children = getChildren(node.id);
+    const photos = node.photos || [];
+    const img = photos.length ? `<img class="card-img" src="${photos[0]}">` : `<div class="card-img placeholder">📁 ${escapeHtml(node.rankName || '阶元')}</div>`;
+    const rankChildren = children.filter(c => c.type === 'rank').length;
+    const spChildren = children.filter(c => c.type !== 'rank').length;
+    return `<div class="record-card" onclick="selectNode('${node.id}')">
+      ${img}
+      <div class="card-body">
+        <div class="card-name">${escapeHtml(node.cn || '未命名')}</div>
+        <div class="card-latin ${isUprightRank(node.rankName) ? 'upright' : ''}">${escapeHtml(node.latin || '')}</div>
+        <div class="card-meta">
+          ${rankChildren ? `<span class="tag">${rankChildren} 子阶元</span>` : ''}
+          ${spChildren ? `<span class="tag way">${spChildren} 物种</span>` : ''}
+        </div>
+      </div>
+    </div>`;
+  }
+  const cover = getSpeciesCover(node);
+  const img = cover ? `<img class="card-img" src="${cover}">` : `<div class="card-img placeholder">暂无照片</div>`;
+  const firstRec = normalizeRecord({ ...((node.records || [])[0] || {}) });
+  const firstName = (firstRec.names || [])[0] || {};
+  const firstRegion = (firstRec.regions || [])[0];
+  const region = firstRegion ? formatRegion(firstRegion) : '';
+  return `<div class="record-card" onclick="selectNode('${node.id}')">
+    ${img}
+    <div class="card-body">
+      <div class="card-ipa">${escapeHtml(firstName.ipa || '')}</div>
+      <div class="card-name">${escapeHtml(node.chinese || '未命名')}</div>
+      <div class="card-latin">${escapeHtml(node.latin || '')}${node.author ? ` <span style="font-style:normal;font-size:0.7rem;color:var(--muted)">${escapeHtml(node.author)}</span>` : ''}</div>
+      <div class="card-meta">
+        ${(firstRec.usages || []).flatMap(u => u.parts || []).slice(0, 2).map(p => `<span class="tag">${escapeHtml(p)}</span>`).join('')}
+        ${(firstRec.usages || []).flatMap(u => (u.ways || []).map(w => w.tag)).slice(0, 2).map(w => `<span class="tag way">${escapeHtml(w)}</span>`).join('')}
+        ${region ? `<span class="tag region">${escapeHtml(region)}</span>` : ''}
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderSpeciesDetail(node, keepInArea) {
+  const el = keepInArea ? document.getElementById('cardArea') : document.getElementById('mainContent');
+  if (!el) return;
+  const path = buildPath(node.id);
+  const records = node.records || [];
+  const cover = getSpeciesCover(node);
+  el.innerHTML = `
+    ${!keepInArea ? `<div class="main-header">
+      <div class="title-block"><h2>${escapeHtml(node.chinese || '未命名')}</h2><div class="taxon-line">${escapeHtml(path)}</div></div>
+      <div class="actions"><div class="view-toggle"><button onclick="backToList()">返回列表</button></div></div>
+    </div>` : ''}
+    <div class="detail-wrap">
+      <div class="detail-card">
+        <h3>${escapeHtml(node.chinese || '未命名')}</h3>
+        ${node.latin ? `<div class="latin-big">${escapeHtml(node.latin)}${node.author ? `<span class="author">${escapeHtml(node.author)}</span>` : ''}</div>` : ''}
+        ${cover ? `<div style="margin-top:0.8rem"><img src="${cover}" style="max-width:19rem;max-height:14rem;object-fit:cover;border-radius:0.6rem;border:1px solid var(--border)"></div>` : ''}
+        <div class="field">
+          <label>记录条目（${records.length} 条）</label>
+          ${records.length ? records.map((rec, ri) => {
+            const n = normalizeRecord({ ...rec });
+            return `
+            <details class="record-entry" ${ri === 0 ? 'open' : ''}>
+              <summary class="entry-head">
+                ${(n.names || []).slice(0, 1).map(nm => `<span class="tag lang">${escapeHtml(nm.text || '')}</span>`).join('')}
+                ${(n.regions || []).slice(0, 2).map(rg => `<span class="tag region">📍 ${escapeHtml(formatRegion(rg))}</span>`).join('')}
+                ${n.ethnic ? `<span class="tag ethnic">👥 ${escapeHtml(n.ethnic)}</span>` : ''}
+                ${(n.langPaths || []).slice(0, 1).map(lp => `<span class="tag lang">🗣️ ${escapeHtml(lp)}</span>`).join('')}
+              </summary>
+              <div class="entry-body">
+                ${(n.names || []).length ? `<div class="entry-line"><span class="lbl">俗名</span><span>${n.names.map(nm => `<span class="name-big" style="margin-right:0.6rem;cursor:pointer" onclick="showNameRecords('${esc(nm.text)}')">${escapeHtml(nm.text)}${nm.ipa ? ` <span class="ipa">${escapeHtml(nm.ipa)}</span>` : ''}</span>`).join('')}</span></div>` : ''}
+                ${(n.regions || []).length ? `<div class="entry-line"><span class="lbl">地区</span><span>${n.regions.map(rg => `<span class="tag region" style="cursor:pointer;margin-right:0.3rem" onclick="jumpToRegion('${esc(rg.province || '')}')">📍 ${escapeHtml(formatRegion(rg))}</span>`).join('')}</span></div>` : ''}
+                ${n.ethnic ? `<div class="entry-line"><span class="lbl">民族</span><span class="tag ethnic" style="cursor:pointer" onclick="switchIndex('ethnic','${esc(n.ethnic)}')">👥 ${escapeHtml(n.ethnic)}</span></div>` : ''}
+                ${(n.langPaths || []).length ? `<div class="entry-line"><span class="lbl">语言</span><span>${n.langPaths.map(lp => `<span class="tag lang" style="cursor:pointer;margin-right:0.3rem" onclick="jumpToLang('${esc(lp)}')">🗣️ ${escapeHtml(lp)}</span>`).join('')}</span></div>` : ''}
+                ${(n.usages || []).map(u => `
+                  <div class="usage-block">
+                    <div class="usage-parts">${(u.parts || []).map(p => `<span class="tag">${escapeHtml(p)}</span>`).join(' ') || '—'}</div>
+                    <div class="usage-ways">${(u.ways || []).map((w, wi) => `
+                      <div class="usage-way-item">
+                        <div class="way-line">
+                          <span class="way-tag">${escapeHtml(w.tag)}</span>
+                          ${w.dish ? `<span class="way-dish">${escapeHtml(w.dish)}</span>` : ''}
+                        </div>
+                        ${w.method ? `<div class="way-method">${escapeHtml(w.method)}</div>` : ''}
+                        ${(w.photos || []).length ? `<div class="photos" style="margin-top:0.35rem">${w.photos.map((p, pi) => `
+                          <div class="photo-with-caption">
+                            <img src="${p}" onclick="openLightbox('${p.replace(/'/g, "\\'")}', '${((w.photoNames && w.photoNames[pi]) || '').replace(/'/g, "\\'")}')">
+                            ${(w.photoNames && w.photoNames[pi]) ? `<div class="photo-caption">${escapeHtml(w.photoNames[pi])}</div>` : ''}
+                          </div>`).join('')}</div>` : ''}
+                      </div>`).join('')}</div>
+                  </div>`).join('')}
+              </div>
+            </details>`;
+          }).join('') : '<div class="value muted">—</div>'}
+        </div>
+        ${node.notes ? `<div class="field"><label>备注</label><div class="value">${escapeHtml(node.notes)}</div></div>` : ''}
+        ${node.refs ? `<div class="field"><label>参考文献</label><div class="value">${escapeHtml(node.refs)}</div></div>` : ''}
+        ${editMode ? `<div class="detail-actions"><button onclick="openEditSpeciesModal('${node.id}')">编辑</button><button class="danger" onclick="deleteNode('${node.id}')">删除</button></div>` : ''}
+      </div>
+    </div>
+  `;
+}
+
+function openLightbox(src, caption) {
+  const el = document.createElement('div');
+  el.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:zoom-out;padding:2.35rem';
+  el.innerHTML = `
+    <img src="${src}" style="max-width:90%;max-height:80vh;object-fit:contain">
+    ${caption ? `<div style="color:#fff;font-size:0.9rem;margin-top:0.95rem;text-align:center;max-width:80%">${escapeHtml(caption)}</div>` : ''}
+  `;
+  el.onclick = () => el.remove();
+  document.body.appendChild(el);
+}
+
+function setViewMode(m) { viewMode = m; renderMain(); }
+
+function backToList() { viewMode = 'card'; renderMain(); }
+
+function selectNode(id) {
+  // 如果当前是语言树，但目标节点是物种（在分类学树里），自动切到分类学树
+  if (currentTreeType === 'lang') {
+    const isSpeciesInTaxon = nodes.some(n => n.id === id && n.type === 'species');
+    if (isSpeciesInTaxon) {
+      currentTreeType = 'taxon';
+      document.querySelectorAll('.tree-switch button').forEach(b => {
+        b.classList.toggle('active', b.dataset.tree === 'taxon');
+      });
+      updateSearchPlaceholder();
+      document.getElementById('searchInput').value = '';
+      treeSearchQuery = '';
+    }
+  }
+  currentSelection = id;
+  currentView = 'content';
+  if (currentTreeType === 'taxon') expandedNodes = new Set();
+  else expandedLangNodes = new Set();
+  expandAncestors(id, currentTreeType);
+  renderTree();
+  renderMain();
+  scrollTreeToSelected();
+}
+
+function buildPath(id) {
+  const parts = [];
+  let cur = getNode(id);
+  while (cur) { parts.unshift(cur.cn || cur.chinese || ''); cur = cur.parentId ? getNode(cur.parentId) : null; }
+  return parts.join(' / ');
+}
+
+function buildLangPath(id) {
+  const parts = [];
+  let cur = getLangNode(id);
+  while (cur && cur.id !== 'lang_root') { parts.unshift(cur.cn || ''); cur = cur.parentId ? getLangNode(cur.parentId) : null; }
+  return parts.join(' > ');
+}
+
+function formatRegion(r) {
+  return [r.province, r.city, r.county, r.town, r.desc].filter(Boolean).join(' · ');
+}
+
+function normalizeRecord(rec) {
+  if (!rec.regions) {
+    rec.regions = rec.region ? [{ ...rec.region }] : [];
+    delete rec.region;
+  }
+  if (!rec.langPaths) {
+    rec.langPaths = rec.langPath ? [rec.langPath] : [];
+    delete rec.langPath;
+  }
+  if (!rec.names) {
+    rec.names = rec.name ? [{ text: rec.name, ipa: rec.ipa || '' }] : [];
+    delete rec.name;
+    delete rec.ipa;
+  }
+  (rec.usages || []).forEach(u => {
+    (u.ways || []).forEach(w => {
+      if (w.method === undefined) w.method = '';
+      if (!w.photos) w.photos = [];
+      if (!w.photoNames) w.photoNames = w.photos.map(() => '');
+      while (w.photoNames.length < w.photos.length) w.photoNames.push('');
+    });
+  });
+  if (!rec.usages) rec.usages = [];
+  return rec;
+}
+
+/* ============================================================
+   图片压缩：上传时把大图压到 1-2MB 之间
+   ============================================================ */
+const MAX_UPLOAD_BYTES = 30 * 1024 * 1024;
+const TARGET_MAX_BYTES = 2 * 1024 * 1024;
+const TARGET_MIN_BYTES = 1 * 1024 * 1024;
+
+async function compressImage(file) {
+  if (file.size > MAX_UPLOAD_BYTES) {
+    throw new Error(`图片「${file.name}」超过 30MB，无法上传`);
+  }
+  if (file.size <= TARGET_MAX_BYTES) {
+    return await fileToDataURL(file);
+  }
+  const dataUrl = await fileToDataURL(file);
+  const img = await loadImage(dataUrl);
+  let quality = 0.9;
+  let result = dataUrl;
+  let blob = await dataURLToBlob(dataUrl);
+  while (blob.size > TARGET_MAX_BYTES && quality >= 0.5) {
+    result = canvasToDataURL(img, quality);
+    blob = await dataURLToBlob(result);
+    quality -= 0.1;
+  }
+  let scale = 1.0;
+  while (blob.size > TARGET_MAX_BYTES && scale > 0.3) {
+    scale -= 0.1;
+    result = canvasToDataURL(img, 0.85, scale);
+    blob = await dataURLToBlob(result);
+  }
+  if (blob.size < TARGET_MIN_BYTES) {
+    let q = 0.9;
+    while (blob.size < TARGET_MIN_BYTES && q <= 0.95) {
+      const test = canvasToDataURL(img, q);
+      const testBlob = await dataURLToBlob(test);
+      if (testBlob.size >= TARGET_MIN_BYTES) {
+        result = test; blob = testBlob; break;
+      }
+      q += 0.05;
+    }
+  }
+  return result;
+}
+
+function loadImage(src) {
+  return new Promise((res, rej) => {
+    const img = new Image();
+    img.onload = () => res(img);
+    img.onerror = rej;
+    img.src = src;
+  });
+}
+function dataURLToBlob(dataUrl) {
+  return new Promise((res) => {
+    const arr = dataUrl.split(',');
+    const mime = arr[0].match(/:(.*?);/)[1];
+    const bstr = atob(arr[1]);
+    let n = bstr.length;
+    const u8 = new Uint8Array(n);
+    while (n--) u8[n] = bstr.charCodeAt(n);
+    res(new Blob([u8], { type: mime }));
+  });
+}
+function canvasToDataURL(img, quality, scale) {
+  scale = scale || 1.0;
+  const canvas = document.createElement('canvas');
+  canvas.width = Math.round(img.width * scale);
+  canvas.height = Math.round(img.height * scale);
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+  return canvas.toDataURL('image/jpeg', quality);
+}
+function fileToDataURL(f) {
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => res(r.result);
+    r.onerror = rej;
+    r.readAsDataURL(f);
+  });
+}
+
+/* ============================================================
+   分类阶元 / 语言节点的图片管理
+   ============================================================ */
+function renderNodePhotoGrid(nodeId, treeType) {
+  const el = document.getElementById('nodePhotoGrid_' + nodeId);
+  if (!el) return;
+  const list = treeType === 'lang' ? langNodes : nodes;
+  const node = list.find(n => n.id === nodeId);
+  if (!node) return;
+  if (!node.photos) node.photos = [];
+  if (!node.photoNames) node.photoNames = node.photos.map(() => '');
+  while (node.photoNames.length < node.photos.length) node.photoNames.push('');
+  if (!node.photos.length) {
+    el.innerHTML = '<div class="photos-empty" style="grid-column:1/-1">暂无图片</div>';
+    return;
+  }
+  el.innerHTML = node.photos.map((p, pi) => `
+    <div class="photo-edit-item ${pi === 0 ? 'is-cover' : ''}" data-idx="${pi}" draggable="true">
+      <span class="photo-num">${pi === 0 ? '封面' : pi+1}</span>
+      ${editMode ? `<button class="photo-remove" onclick="removeNodePhoto(event, '${nodeId}', '${treeType}', ${pi})">×</button>` : ''}
+      <img src="${p}">
+      <input class="photo-name-input" placeholder="图片注释" value="${escapeHtml(node.photoNames[pi] || '')}" oninput="updateNodePhotoName('${nodeId}', '${treeType}', ${pi}, this.value)" onclick="event.stopPropagation()">
+    </div>
+  `).join('');
+  if (!editMode) return;
+  const items = el.querySelectorAll('.photo-edit-item');
+  let dragIdx = null;
+  items.forEach(item => {
+    item.addEventListener('dragstart', e => { dragIdx = +item.dataset.idx; item.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; });
+    item.addEventListener('dragend', () => { item.classList.remove('dragging'); items.forEach(i => i.classList.remove('drag-over')); });
+    item.addEventListener('dragover', e => { e.preventDefault(); item.classList.add('drag-over'); });
+    item.addEventListener('dragleave', () => item.classList.remove('drag-over'));
+    item.addEventListener('drop', async e => {
+      e.preventDefault();
+      const targetIdx = +item.dataset.idx;
+      if (dragIdx === null || dragIdx === targetIdx) return;
+      const [movedPhoto] = node.photos.splice(dragIdx, 1);
+      const [movedName] = node.photoNames.splice(dragIdx, 1);
+      node.photos.splice(targetIdx, 0, movedPhoto);
+      node.photoNames.splice(targetIdx, 0, movedName);
+      await dbPut(treeType === 'lang' ? 'langNodes' : 'nodes', node);
+      renderNodePhotoGrid(nodeId, treeType);
+      renderTree();
+    });
+  });
+}
+
+function updateNodePhotoName(nodeId, treeType, pi, v) {
+  const list = treeType === 'lang' ? langNodes : nodes;
+  const node = list.find(n => n.id === nodeId);
+  if (!node) return;
+  if (!node.photoNames) node.photoNames = [];
+  node.photoNames[pi] = v;
+}
+
+async function onNodePhotoUpload(e, nodeId, treeType) {
+  const files = Array.from(e.target.files || []);
+  const list = treeType === 'lang' ? langNodes : nodes;
+  const node = list.find(n => n.id === nodeId);
+  if (!node) return;
+  if (!node.photos) node.photos = [];
+  if (!node.photoNames) node.photoNames = [];
+  try {
+    for (const f of files) {
+      const dataUrl = await compressImage(f);
+      node.photos.push(dataUrl);
+      node.photoNames.push('');
+    }
+    await dbPut(treeType === 'lang' ? 'langNodes' : 'nodes', node);
+    renderNodePhotoGrid(nodeId, treeType);
+    renderTree();
+  } catch (err) {
+    toast(err.message, true);
+  }
+  e.target.value = '';
+}
+
+async function removeNodePhoto(e, nodeId, treeType, pi) {
+  e.stopPropagation();
+  const list = treeType === 'lang' ? langNodes : nodes;
+  const node = list.find(n => n.id === nodeId);
+  if (!node) return;
+  node.photos.splice(pi, 1);
+  if (node.photoNames) node.photoNames.splice(pi, 1);
+  await dbPut(treeType === 'lang' ? 'langNodes' : 'nodes', node);
+  renderNodePhotoGrid(nodeId, treeType);
+  renderTree();
+}
+
+/* ============================================================
+   索引
+   ============================================================ */
+function switchIndex(name, initialSearch) {
+  currentView = 'index:' + name;
+  currentIndexName = name;
+  indexSearchQuery = initialSearch || '';
+  document.querySelectorAll('.index-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.index === name);
+  });
+  currentSelection = null;
+  renderMain();
+  renderIndexPage();
+}
+
+function collectAllRecords() {
+  const result = [];
+  nodes.forEach(n => { if (n.type === 'species') (n.records || []).forEach(rec => result.push({ node: n, rec: normalizeRecord(rec) })); });
+  return result;
+}
+
+function indexSearchBar(placeholder) {
+  return `<div class="index-search"><input placeholder="${placeholder}（回车搜索）" value="${escapeHtml(indexSearchQuery)}" oninput="onIndexSearchInput(this.value)" onkeydown="if(event.key==='Enter'){event.preventDefault();onIndexSearchEnter();}"></div>`;
+}
+
+function onIndexSearch(v) { indexSearchQuery = v; renderIndexPage(); }
+
+function matchIndex(s) {
+  if (!indexSearchQuery) return true;
+  return String(s || '').toLowerCase().includes(indexSearchQuery.toLowerCase());
+}
+
+function renderIndexPage() {
+  const el = document.getElementById('mainContent');
+  const emptyState = document.getElementById('emptyState');
+  emptyState.style.display = 'none';
+  el.style.display = 'block';
+  if (!currentView.startsWith('index:')) return;
+  const name = currentView.slice(6);
+  const all = collectAllRecords();
+
+  if (name === 'chinese') {
+    const map = new Map();
+    nodes.filter(n => n.type === 'species' && n.chinese).forEach(n => { if (!map.has(n.chinese)) map.set(n.chinese, []); map.get(n.chinese).push(n); });
+    const entries = Array.from(map.entries()).map(([nm, list]) => ({ key: nm, list }));
+    const filtered = entries.filter(e => matchIndex(e.key));
+    renderLetterGroups(el, '📖 中文名索引', filtered, e => ({
+      letter: getPinyinInitial(e.key),
+      sortKey: getPinyinForSort(e.key),
+      html: `<div class="dict-item" onclick="selectNode('${e.list[0].id}')"><span class="name">${escapeHtml(e.key)}</span>${e.list[0].latin ? `<span class="latin">${escapeHtml(e.list[0].latin)}</span>` : ''}</div>`
+    }), '搜索中文名…');
+    return;
+  }
+  if (name === 'latin') {
+    const list = nodes.filter(n => n.type === 'species' && n.latin && matchIndex(n.latin));
+    const entries = list.map(n => ({ key: n.latin, list: [n] }));
+    renderLetterGroups(el, '🔤 学名索引', entries, e => ({
+      letter: getLatinInitial(e.key),
+      sortKey: e.key.toLowerCase(),
+      html: `<div class="sci-item" onclick="selectNode('${e.list[0].id}')"><span class="latin">${escapeHtml(e.key)}</span>${e.list[0].author ? `<span style="font-style:normal;font-size:0.75rem;color:var(--muted)">${escapeHtml(e.list[0].author)}</span>` : ''}<span class="cn">${escapeHtml(e.list[0].chinese || '')}</span></div>`
+    }), '搜索学名…');
+    return;
+  }
+  if (name === 'common') {
+    const map = new Map();
+    all.forEach(({node, rec}) => {
+      const norm = normalizeRecord(rec);
+      (norm.names || []).forEach(nm => {
+        const t = nm.text;
+        if (!t) return;
+        if (!map.has(t)) map.set(t, []);
+        map.get(t).push({ node, rec: norm });
+      });
+    });
+    const entries = Array.from(map.entries()).map(([nm, list]) => ({ key: nm, list }));
+    const filtered = entries.filter(e => matchIndex(e.key));
+    renderLetterGroups(el, '🏷️ 俗名索引', filtered, e => ({
+      letter: getPinyinInitial(e.key),
+      sortKey: getPinyinForSort(e.key),
+      html: `<div class="dict-item" onclick="showNameRecords('${esc(e.key)}')"><span class="name">${escapeHtml(e.key)}</span><span class="count">${e.list.length} 条</span></div>`
+    }), '搜索俗名…');
+    return;
+  }
+  if (name === 'part') {
+    const map = new Map();
+    all.forEach(({rec}) => (rec.usages || []).forEach(u => (u.parts || []).forEach(p => map.set(p, (map.get(p)||0)+1))));
+    const filtered = Array.from(map.entries()).filter(([k]) => matchIndex(k)).sort((a,b) => getPinyinForSort(a[0]).localeCompare(getPinyinForSort(b[0])));
+    el.innerHTML = `<div class="index-page"><h2>🍃 食用部位索引</h2><div class="desc">共 ${filtered.length} 个部位标签。</div>
+      ${indexSearchBar('搜索部位…')}
+      <div class="tag-cloud">${filtered.map(([k,v]) => `<div class="tag-item" onclick="showPartRecords('${esc(k)}')">${escapeHtml(k)}<span class="count">${v}</span></div>`).join('')}</div>
+    </div>`;
+    return;
+  }
+  if (name === 'way') {
+    const map = new Map();
+    all.forEach(({rec}) => (rec.usages || []).forEach(u => (u.ways || []).forEach(w => map.set(w.tag, (map.get(w.tag)||0)+1))));
+    const filtered = Array.from(map.entries()).filter(([k]) => matchIndex(k)).sort((a,b) => getPinyinForSort(a[0]).localeCompare(getPinyinForSort(b[0])));
+    el.innerHTML = `<div class="index-page"><h2>🍲 食用方式索引</h2><div class="desc">共 ${filtered.length} 个方式标签。</div>
+      ${indexSearchBar('搜索方式…')}
+      <div class="tag-cloud">${filtered.map(([k,v]) => `<div class="tag-item" onclick="showWayRecords('${esc(k)}')">${escapeHtml(k)}<span class="count">${v}</span></div>`).join('')}</div>
+    </div>`;
+    return;
+  }
+  if (name === 'dish') {
+    const map = new Map();
+    all.forEach(({rec}) => (rec.usages || []).forEach(u => (u.ways || []).forEach(w => { if (w.dish) map.set(w.dish, (map.get(w.dish)||0)+1); })));
+    const entries = Array.from(map.entries()).map(([nm, count]) => ({ key: nm, list: count }));
+    const filtered = entries.filter(e => matchIndex(e.key));
+    renderLetterGroups(el, '🍽️ 菜品名索引', filtered, e => ({
+      letter: getPinyinInitial(e.key),
+      sortKey: getPinyinForSort(e.key),
+      html: `<div class="dict-item" onclick="showDishRecords('${esc(e.key)}')"><span class="name">${escapeHtml(e.key)}</span><span class="count">${e.list} 条</span></div>`
+    }), '搜索菜品名…');
+    return;
+  }
+  if (name === 'region') {
+    const provinces = {};
+    all.forEach(({rec}) => {
+      const norm = normalizeRecord(rec);
+      (norm.regions || []).forEach(r => {
+        if (!r.province) return;
+        if (!provinces[r.province]) provinces[r.province] = { count: 0 };
+        provinces[r.province].count++;
+      });
+    });
+    const entries = Object.entries(provinces).map(([nm, v]) => ({ key: nm, list: v.count }));
+    const filtered = entries.filter(e => matchIndex(e.key));
+    renderLetterGroups(el, '📍 地区索引', filtered, e => ({
+      letter: getPinyinInitial(e.key),
+      sortKey: getPinyinForSort(e.key),
+      html: `<div class="dict-item" onclick="showProvinceRecords('${esc(e.key)}')"><span class="name">${escapeHtml(e.key)}</span><span class="count">${e.list} 条</span></div>`
+    }), '搜索省份…');
+    return;
+  }
+  if (name === 'ethnic') {
+    const map = new Map();
+    all.forEach(({rec}) => { if (rec.ethnic) map.set(rec.ethnic, (map.get(rec.ethnic)||0)+1); });
+    const entries = Array.from(map.entries()).map(([nm, count]) => ({ key: nm, list: count }));
+    const filtered = entries.filter(e => matchIndex(e.key));
+    renderLetterGroups(el, '👥 民族索引', filtered, e => ({
+      letter: getPinyinInitial(e.key),
+      sortKey: getPinyinForSort(e.key),
+      html: `<div class="dict-item" onclick="showEthnicRecords('${esc(e.key)}')"><span class="name">${escapeHtml(e.key)}</span><span class="count">${e.list} 条</span></div>`
+    }), '搜索民族…');
+    return;
+  }
+}
+
+function backToIndex(name) { currentIndexName = name; switchIndex(name); }
+
+function showNameRecords(name) {
+  const all = [];
+  nodes.forEach(n => {
+    if (n.type !== 'species') return;
+    (n.records || []).forEach(rec => {
+      const norm = normalizeRecord({ ...rec });
+      (norm.names || []).forEach(nm => {
+        if (nm.text === name) all.push({ node: n, rec: norm });
+      });
+    });
+  });
+  const el = document.getElementById('mainContent');
+  el.innerHTML = `<div class="index-page"><div style="cursor:pointer;color:var(--muted);margin-bottom:0.7rem" onclick="backToIndex('common')">← 返回俗名索引</div><h2>🏷️ ${escapeHtml(name)}</h2><div class="desc">关联 ${all.length} 条记录</div>
+    ${all.map(({node, rec}) => `<div class="record-list-item" onclick="selectNode('${node.id}')"><span class="li-title">${escapeHtml(node.chinese || '')}</span><span class="li-latin">${escapeHtml(node.latin || '')}</span><span class="li-meta">${escapeHtml((rec.regions[0] && formatRegion(rec.regions[0])) || '')}</span></div>`).join('')}
+  </div>`;
+}
+function showPartRecords(part) {
+  const all = collectAllRecords().filter(x => (x.rec.usages || []).some(u => (u.parts || []).includes(part)));
+  const el = document.getElementById('mainContent');
+  el.innerHTML = `<div class="index-page"><div style="cursor:pointer;color:var(--muted);margin-bottom:0.7rem" onclick="backToIndex('part')">← 返回部位索引</div><h2>🍃 ${escapeHtml(part)}</h2><div class="desc">${all.length} 条记录</div>
+    ${all.map(({node}) => `<div class="record-list-item" onclick="selectNode('${node.id}')"><span class="li-title">${escapeHtml(node.chinese || '')}</span><span class="li-latin">${escapeHtml(node.latin || '')}</span></div>`).join('')}
+  </div>`;
+}
+function showWayRecords(way) {
+  const all = collectAllRecords().filter(x => (x.rec.usages || []).some(u => (u.ways || []).some(w => w.tag === way)));
+  const el = document.getElementById('mainContent');
+  el.innerHTML = `<div class="index-page"><div style="cursor:pointer;color:var(--muted);margin-bottom:0.7rem" onclick="backToIndex('way')">← 返回方式索引</div><h2>🍲 ${escapeHtml(way)}</h2><div class="desc">${all.length} 条记录</div>
+    ${all.map(({node}) => `<div class="record-list-item" onclick="selectNode('${node.id}')"><span class="li-title">${escapeHtml(node.chinese || '')}</span><span class="li-latin">${escapeHtml(node.latin || '')}</span></div>`).join('')}
+  </div>`;
+}
+function showDishRecords(dish) {
+  const all = collectAllRecords().filter(x => (x.rec.usages || []).some(u => (u.ways || []).some(w => w.dish === dish)));
+  const el = document.getElementById('mainContent');
+  el.innerHTML = `<div class="index-page"><div style="cursor:pointer;color:var(--muted);margin-bottom:0.7rem" onclick="backToIndex('dish')">← 返回菜品索引</div><h2>🍽️ ${escapeHtml(dish)}</h2><div class="desc">${all.length} 条记录</div>
+    ${all.map(({node}) => `<div class="record-list-item" onclick="selectNode('${node.id}')"><span class="li-title">${escapeHtml(node.chinese || '')}</span><span class="li-latin">${escapeHtml(node.latin || '')}</span></div>`).join('')}
+  </div>`;
+}
+function showMethodRecords(method) {
+  const all = collectAllRecords().filter(x => (x.rec.usages || []).some(u => (u.ways || []).some(w => w.method === method)));
+  const el = document.getElementById('mainContent');
+  el.innerHTML = `<div class="index-page"><div style="cursor:pointer;color:var(--muted);margin-bottom:0.7rem" onclick="backToIndex('method')">← 返回做法索引</div><h2>📝 ${escapeHtml(method)}</h2><div class="desc">${all.length} 条记录</div>
+    ${all.map(({node}) => `<div class="record-list-item" onclick="selectNode('${node.id}')"><span class="li-title">${escapeHtml(node.chinese || '')}</span><span class="li-latin">${escapeHtml(node.latin || '')}</span></div>`).join('')}
+  </div>`;
+}
+function showProvinceRecords(prov) {
+  const all = [];
+  nodes.forEach(n => {
+    if (n.type !== 'species') return;
+    (n.records || []).forEach(rec => {
+      const norm = normalizeRecord({ ...rec });
+      if ((norm.regions || []).some(r => r.province === prov)) all.push({ node: n, rec: norm });
+    });
+  });
+  const el = document.getElementById('mainContent');
+  el.innerHTML = `<div class="index-page"><div style="cursor:pointer;color:var(--muted);margin-bottom:0.7rem" onclick="backToIndex('region')">← 返回地区索引</div><h2>📍 ${escapeHtml(prov)}</h2><div class="desc">${all.length} 条记录</div>
+    ${all.map(({node, rec}) => `<div class="record-list-item" onclick="selectNode('${node.id}')"><span class="li-title">${escapeHtml(node.chinese || '')}</span><span class="li-meta">${escapeHtml((rec.regions[0] && formatRegion(rec.regions[0])) || '')}</span></div>`).join('')}
+  </div>`;
+}
+function showEthnicRecords(ethnic) {
+  const all = collectAllRecords().filter(x => x.rec.ethnic === ethnic);
+  const el = document.getElementById('mainContent');
+  el.innerHTML = `<div class="index-page"><div style="cursor:pointer;color:var(--muted);margin-bottom:0.7rem" onclick="backToIndex('ethnic')">← 返回民族索引</div><h2>👥 ${escapeHtml(ethnic)}</h2><div class="desc">${all.length} 条记录</div>
+    ${all.map(({node, rec}) => `<div class="record-list-item" onclick="selectNode('${node.id}')"><span class="li-title">${escapeHtml(node.chinese || '')}</span><span class="li-meta">${escapeHtml(rec.name || '')}</span></div>`).join('')}
+  </div>`;
+}
+function showLangRecords(langPath) {
+  const all = collectAllRecords().filter(x => x.rec.langPath === langPath);
+  const el = document.getElementById('mainContent');
+  el.innerHTML = `<div class="index-page"><div style="cursor:pointer;color:var(--muted);margin-bottom:0.7rem" onclick="backToIndex('lang')">← 返回语言索引</div><h2>🗣️ ${escapeHtml(langPath)}</h2><div class="desc">${all.length} 条记录</div>
+    ${all.map(({node, rec}) => `<div class="record-list-item" onclick="selectNode('${node.id}')"><span class="li-title">${escapeHtml(node.chinese || '')}</span><span class="li-meta">${escapeHtml(rec.name || '')}</span></div>`).join('')}
+  </div>`;
+}
+
+function openModal(html, size) {
+  document.getElementById('modalBody').innerHTML = html;
+  const c = document.getElementById('modalContainer');
+  c.classList.toggle('modal-sm', size === 'sm');
+  c.classList.toggle('modal-lg', size === 'lg');
+  document.getElementById('genericModal').classList.add('open');
+}
+function closeModal() {
+  document.getElementById('genericModal').classList.remove('open');
+  modalContext = null;
+}
+
+let selectedRankName = null;
+
+function openAddRankModal(parentId, treeType) {
+  if (!editMode) { toast('请先开启编辑模式'); return; }
+  modalContext = { parentId, treeType: treeType || currentTreeType };
+  selectedRankName = null;
+  const list = treeType === 'lang' ? langNodes : nodes;
+  const parent = parentId ? list.find(n => n.id === parentId) : null;
+  const standardRanks = treeType === 'lang' ? STANDARD_LANG_RANKS : STANDARD_RANKS;
+  const rankOrder = treeType === 'lang' ? LANG_RANK_ORDER : RANK_ORDER;
+  const parentRankIdx = parent && parent.rankName ? rankOrder[parent.rankName] : -1;
+  const availableRanks = standardRanks.filter(r => rankOrder[r] > parentRankIdx);
+  const customKey = treeType === 'lang' ? 'customLangRanks' : 'customRanks';
+  const customList = meta[customKey] || [];
+  const allRankOptions = [...availableRanks, ...customList];
+  openModal(`
+    <h3>添加${parent ? '「' + escapeHtml(parent.cn) + '」下的' : '顶层'}阶元${treeType === 'lang' ? '（语言树）' : ''}</h3>
+    <div class="form-row">
+      <label>阶元名</label>
+      <div class="rank-choice" id="rankChoice">${allRankOptions.map(r => `<button type="button" onclick="selectRankChoice(this, '${escapeHtml(r)}')">${escapeHtml(r)}</button>`).join('')}</div>
+      <input id="customRankInput" placeholder="或输入新的阶元名" style="margin-top:0.35rem" oninput="onCustomRankInput(this.value)">
+    </div>
+    <div class="form-row">
+      <label>中文名</label>
+      <div style="position:relative">
+        <input id="rankCn" placeholder="${treeType === 'lang' ? '如：吴语' : '如：姜科'}" autocomplete="off" oninput="filterRankCn(this.value)" onfocus="filterRankCn(this.value)">
+        <div id="rankCnDropdown" class="rank-dropdown"></div>
+      </div>
+    </div>
+    <div class="form-row"><label>拉丁名 / 外文名</label><input id="rankLatin" placeholder="${treeType === 'lang' ? '如：Wu Chinese' : '如：Zingiberaceae'}"></div>
+    <div class="form-actions"><button onclick="closeModal()">取消</button><button class="primary" onclick="saveRank()">保存</button></div>
+  `, 'sm');
+}
+
+function openEditRankNodeModal(id, treeType) {
+  if (!editMode) { toast('请先开启编辑模式'); return; }
+  const node = getNode(id);
+  if (!node) return;
+  modalContext = { editRankNodeId: id, treeType };
+  const customRanks = meta.customRanks || [];
+  const allRanks = [...STANDARD_RANKS, ...customRanks];
+  openModal(`
+    <h3>编辑阶元节点</h3>
+    <div class="form-row"><label>阶元</label><select id="editRankName">${allRanks.map(r => `<option value="${escapeHtml(r)}" ${r === node.rankName ? 'selected' : ''}>${escapeHtml(r)}</option>`).join('')}</select></div>
+    <div class="form-row"><label>中文名</label><input id="editRankCn" value="${escapeHtml(node.cn)}"></div>
+    <div class="form-row"><label>拉丁名</label><input id="editRankLatin" value="${escapeHtml(node.latin || '')}"></div>
+    <div class="form-actions">
+      <button onclick="closeModal()">取消</button>
+      <button class="danger" onclick="deleteRankNode()">删除此节点</button>
+      <button class="primary" onclick="saveEditRankNode()">保存</button>
+    </div>
+  `, 'sm');
+}
+async function saveEditRankNode() {
+  const id = modalContext.editRankNodeId;
+  const node = getNode(id);
+  if (!node) return;
+  node.rankName = document.getElementById('editRankName').value;
+  node.cn = document.getElementById('editRankCn').value.trim();
+  node.latin = document.getElementById('editRankLatin').value.trim();
+  if (!node.cn) { toast('请填写中文名'); return; }
+  await dbPut('nodes', node);
+  nodes = await dbGetAll('nodes');
+  closeModal(); renderTree(); renderMain();
+  toast('已更新');
+}
+async function deleteRankNode() {
+  const id = modalContext.editRankNodeId;
+  const node = getNode(id);
+  if (!node) return;
+  if (!confirm('确定删除此节点及其所有子节点？')) return;
+  if (node.parentId) {
+    const p = getNode(node.parentId);
+    if (p) { p.children = (p.children || []).filter(c => c !== id); await dbPut('nodes', p); }
+  }
+  async function del(nid) {
+    const n = getNode(nid);
+    if (!n) return;
+    for (const c of (n.children || [])) await del(c);
+    await dbDelete('nodes', nid);
+  }
+  await del(id);
+  nodes = await dbGetAll('nodes');
+  closeModal(); currentSelection = null;
+  renderTree(); renderMain();
+  toast('已删除');
+}
+
+function openEditLangNodeModal(id) {
+  if (!editMode) { toast('请先开启编辑模式'); return; }
+  const node = getLangNode(id);
+  if (!node) return;
+  modalContext = { editLangNodeId: id };
+  const customRanks = meta.customLangRanks || [];
+  const allRanks = [...STANDARD_LANG_RANKS, ...customRanks];
+  openModal(`
+    <h3>编辑语言节点</h3>
+    <div class="form-row"><label>阶元</label><select id="editLangRank">${allRanks.map(r => `<option value="${escapeHtml(r)}" ${r === node.rankName ? 'selected' : ''}>${escapeHtml(r)}</option>`).join('')}</select></div>
+    <div class="form-row"><label>中文名</label><input id="editLangCn" value="${escapeHtml(node.cn)}"></div>
+    <div class="form-row"><label>外文名 / 拉丁名</label><input id="editLangLatin" value="${escapeHtml(node.latin || '')}"></div>
+    <div class="form-actions">
+      <button onclick="closeModal()">取消</button>
+      <button class="danger" onclick="deleteLangNode()">删除此节点</button>
+      <button class="primary" onclick="saveEditLangNode()">保存</button>
+    </div>
+  `, 'sm');
+}
+
+async function saveEditLangNode() {
+  const id = modalContext.editLangNodeId;
+  const node = getLangNode(id);
+  if (!node) return;
+  const oldCn = node.cn;
+  const newCn = document.getElementById('editLangCn').value.trim();
+  const newRank = document.getElementById('editLangRank').value;
+  const newLatin = document.getElementById('editLangLatin').value.trim();
+  if (!newCn) { toast('请填写中文名'); return; }
+
+  node.rankName = newRank;
+  node.cn = newCn;
+  node.latin = newLatin;
+  await dbPut('langNodes', node);
+
+  let changed = 0;
+  if (oldCn !== newCn) {
+    for (const sp of nodes) {
+      if (sp.type !== 'species') continue;
+      let nodeChanged = false;
+      (sp.records || []).forEach(rec => {
+        const lps = rec.langPaths || (rec.langPath ? [rec.langPath] : []);
+        if (!lps.length) return;
+        let localChanged = false;
+        const newPaths = lps.map(lp => {
+          const parts = lp.split(' > ');
+          if (parts.includes(oldCn)) {
+            localChanged = true;
+            return parts.map(p => p === oldCn ? newCn : p).join(' > ');
+          }
+          return lp;
+        });
+        if (localChanged) {
+          rec.langPaths = newPaths;
+          delete rec.langPath;
+          nodeChanged = true;
+        }
+      });
+      if (nodeChanged) {
+        await dbPut('nodes', sp);
+        changed++;
+      }
+    }
+    nodes = await dbGetAll('nodes');
+  }
+
+  langNodes = await dbGetAll('langNodes');
+  closeModal();
+  renderTree();
+  renderMain();
+  if (changed > 0) toast(`已更新语言节点，同步了 ${changed} 个词条`);
+  else toast('已更新');
+}
+
+async function deleteLangNode() {
+  const id = modalContext.editLangNodeId;
+  const node = getLangNode(id);
+  if (!node) return;
+  if (!confirm('确定删除此节点及其所有子节点？\n\n所有词条里挂在该语言（或其子语言）下的语言记录会被清空。')) return;
+
+  const deletedNames = new Set();
+  function collectNames(nid) {
+    const n = getLangNode(nid);
+    if (!n) return;
+    if (n.cn) deletedNames.add(n.cn);
+    (n.children || []).forEach(collectNames);
+  }
+  collectNames(id);
+
+  if (node.parentId) {
+    const p = getLangNode(node.parentId);
+    if (p) { p.children = (p.children || []).filter(c => c !== id); await dbPut('langNodes', p); }
+  }
+  async function del(nid) {
+    const n = getLangNode(nid);
+    if (!n) return;
+    for (const c of (n.children || [])) await del(c);
+    await dbDelete('langNodes', nid);
+  }
+  await del(id);
+  langNodes = await dbGetAll('langNodes');
+
+  let changed = 0;
+  for (const sp of nodes) {
+    if (sp.type !== 'species') continue;
+    let nodeChanged = false;
+    (sp.records || []).forEach(rec => {
+      const lps = rec.langPaths || (rec.langPath ? [rec.langPath] : []);
+      if (!lps.length) return;
+      const newPaths = [];
+      let localChanged = false;
+      lps.forEach(lp => {
+        const parts = lp.split(' > ');
+        const filtered = parts.filter(p => !deletedNames.has(p));
+        const newPath = filtered.join(' > ');
+        if (newPath !== lp) localChanged = true;
+        if (newPath) newPaths.push(newPath);
+      });
+      if (localChanged) {
+        rec.langPaths = newPaths;
+        delete rec.langPath;
+        nodeChanged = true;
+      }
+    });
+    if (nodeChanged) {
+      await dbPut('nodes', sp);
+      changed++;
+    }
+  }
+  nodes = await dbGetAll('nodes');
+
+  closeModal();
+  currentSelection = null;
+  renderTree();
+  renderMain();
+  if (changed > 0) toast(`已删除语言节点，清空了 ${changed} 个词条的语言信息`);
+  else toast('已删除');
+}
+
+
+function selectRankChoice(btn, rank) {
+  document.querySelectorAll('#rankChoice button').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  selectedRankName = rank;
+  document.getElementById('customRankInput').value = '';
+}
+function onCustomRankInput(v) {
+  if (v.trim()) {
+    selectedRankName = null;
+    document.querySelectorAll('#rankChoice button').forEach(b => b.classList.remove('selected'));
+  }
+}
+function filterRankCn(q) {
+  const dropdown = document.getElementById('rankCnDropdown');
+  if (!dropdown) return;
+  const rank = selectedRankName || (document.getElementById('customRankInput').value.trim() || '');
+  if (!rank) { dropdown.style.display = 'none'; return; }
+  const treeType = modalContext.treeType;
+  let opts = [];
+  if (treeType === 'taxon') {
+    const seen = new Set();
+    nodes.forEach(n => { if (n.rankName === rank && n.cn && !seen.has(n.cn)) { opts.push({ cn: n.cn, latin: n.latin || '' }); seen.add(n.cn); } });
+  } else {
+    const seen = new Set();
+    langNodes.forEach(n => { if (n.rankName === rank && n.cn && !seen.has(n.cn)) { opts.push({ cn: n.cn, latin: '' }); seen.add(n.cn); } });
+  }
+  const lower = (q || '').toLowerCase();
+  const filtered = lower ? opts.filter(o => o.cn.toLowerCase().includes(lower) || (o.latin || '').toLowerCase().includes(lower)) : opts;
+  if (!filtered.length) dropdown.innerHTML = '<div style="padding:0.45rem 0.7rem;font-size:0.8rem;color:var(--muted)">无匹配（可手动输入）</div>';
+  else dropdown.innerHTML = filtered.slice(0, 80).map((o, i) => `<div class="rank-opt ${i===0?'hl':''}" data-i="${i}" onmousedown="event.preventDefault();pickRankCn(${i})"><span>${escapeHtml(o.cn)}</span>${o.latin ? `<span style="font-family:var(--serif);font-style:italic;font-size:0.75rem;color:var(--muted)">${escapeHtml(o.latin)}</span>` : ''}</div>`).join('');
+  dropdown._opts = filtered;
+  dropdown.style.display = 'block';
+}
+function pickRankCn(i) {
+  const dropdown = document.getElementById('rankCnDropdown');
+  const o = dropdown._opts[i];
+  if (!o) return;
+  document.getElementById('rankCn').value = o.cn;
+  document.getElementById('rankLatin').value = o.latin || '';
+  dropdown.style.display = 'none';
+}
+async function saveRank() {
+  const treeType = modalContext.treeType;
+  const rankName = selectedRankName || document.getElementById('customRankInput').value.trim();
+  const cn = document.getElementById('rankCn').value.trim();
+  const latin = document.getElementById('rankLatin').value.trim();
+  if (!rankName) { toast('请选择或输入阶元名'); return; }
+  if (!cn) { toast('请填写中文名'); return; }
+  const list = treeType === 'lang' ? langNodes : nodes;
+  const parent = modalContext.parentId ? list.find(n => n.id === modalContext.parentId) : null;
+  const rankOrder = treeType === 'lang' ? LANG_RANK_ORDER : RANK_ORDER;
+  if (parent && rankOrder[rankName] !== undefined && rankOrder[parent.rankName] !== undefined) {
+    if (rankOrder[rankName] <= rankOrder[parent.rankName]) { toast(`不能在「${parent.rankName}」下添加「${rankName}」`, true); return; }
+  }
+  const newNode = {
+    id: (treeType === 'lang' ? 'lang_n_' : 'n_') + Date.now() + '_' + Math.random().toString(36).slice(2, 7),
+    type: treeType === 'lang' ? 'langRank' : 'rank',
+    rankName, cn, latin,
+    parentId: parent ? parent.id : null,
+    children: [], photos: [], photoNames: []
+  };
+  await dbPut(treeType === 'lang' ? 'langNodes' : 'nodes', newNode);
+  if (parent) {
+    if (!parent.children) parent.children = [];
+    parent.children.push(newNode.id);
+    await dbPut(treeType === 'lang' ? 'langNodes' : 'nodes', parent);
+  }
+  const customKey = treeType === 'lang' ? 'customLangRanks' : 'customRanks';
+  const standardRanks = treeType === 'lang' ? STANDARD_LANG_RANKS : STANDARD_RANKS;
+  if (!standardRanks.includes(rankName)) {
+    if (!meta[customKey]) meta[customKey] = [];
+    if (!meta[customKey].includes(rankName)) { meta[customKey].push(rankName); await dbPut('meta', { key: customKey, value: meta[customKey] }); }
+  }
+  if (treeType === 'lang') langNodes = await dbGetAll('langNodes'); else nodes = await dbGetAll('nodes');
+  closeModal();
+  currentSelection = newNode.id;
+  expandAncestors(newNode.id, treeType);
+  renderTree(); renderMain(); scrollTreeToSelected();
+  toast('已添加阶元');
+}
+
+function openCustomRankTypeModal(treeType) {
+  if (!editMode) { toast('请先开启编辑模式'); return; }
+  const isLang = treeType === 'lang';
+  openModal(`
+    <h3>添加自定义阶元类型${isLang ? '（语言树）' : ''}</h3>
+    <div class="form-row"><label>阶元名</label><input id="newCustomRank" placeholder="${isLang ? '如：小片、土语' : '如：亚纲、亚科、组、系'}"></div>
+    <div class="form-actions"><button onclick="closeModal()">取消</button><button class="primary" onclick="saveCustomRankType('${treeType}')">保存</button></div>
+  `, 'sm');
+}
+async function saveCustomRankType(treeType) {
+  const v = document.getElementById('newCustomRank').value.trim();
+  if (!v) { toast('请输入阶元名'); return; }
+  const standardRanks = treeType === 'lang' ? STANDARD_LANG_RANKS : STANDARD_RANKS;
+  if (standardRanks.includes(v)) { toast('该阶元已存在'); return; }
+  const customKey = treeType === 'lang' ? 'customLangRanks' : 'customRanks';
+  if (!meta[customKey]) meta[customKey] = [];
+  if (meta[customKey].includes(v)) { toast('该阶元已存在'); return; }
+  meta[customKey].push(v);
+  await dbPut('meta', { key: customKey, value: meta[customKey] });
+  closeModal();
+  toast('已添加阶元类型：' + v);
+}
+
+/* ============================================================
+   物种表单
+   ============================================================ */
+function openAddSpeciesModal(parentId) {
+  if (!editMode) { toast('请先开启编辑模式'); return; }
+  currentSpeciesForm = { id: null, parentId, chinese: '', latin: '', author: '', notes: '', refs: '', coverPhoto: '', records: [ newRecordEntry() ] };
+  renderSpeciesForm('新增物种/词条');
+}
+
+function openEditSpeciesModal(id) {
+  if (!editMode) { toast('请先开启编辑模式'); return; }
+  const node = getNode(id);
+  if (!node) return;
+  currentSpeciesForm = {
+    id: node.id, parentId: node.parentId,
+    chinese: node.chinese || '', latin: node.latin || '', author: node.author || '',
+    notes: node.notes || '', refs: node.refs || '',
+    coverPhoto: node.coverPhoto || '',
+    records: (node.records || []).map(r => {
+      const norm = normalizeRecord({ ...r });
+      return {
+        regions: (norm.regions || []).map(rg => ({ ...rg })),
+        ethnic: norm.ethnic || '',
+        langPaths: [...(norm.langPaths || [])],
+        names: (norm.names || []).map(n => ({ ...n })),
+        usages: (norm.usages || []).map(u => ({
+          parts: [...(u.parts || [])],
+          ways: (u.ways || []).map(w => ({ tag: w.tag || '', dish: w.dish || '', method: w.method || '', photos: [...(w.photos || [])], photoNames: [...(w.photoNames || [])] }))
+        }))
+      };
+    })
+  };
+  if (!currentSpeciesForm.records.length) currentSpeciesForm.records.push(newRecordEntry());
+  renderSpeciesForm('编辑物种/词条');
+}
+
+function newRecordEntry() {
+  return {
+    regions: [],
+    ethnic: '',
+    langPaths: [],
+    names: [],
+    usages: [{ parts: [], ways: [{ tag: '', dish: '', method: '', photos: [], photoNames: [] }] }]
+  };
+}
+
+function renderSpeciesForm(title) {
+  const parent = currentSpeciesForm.parentId ? getNode(currentSpeciesForm.parentId) : null;
+  const path = parent ? buildPath(parent.id) : '根';
+  const f = currentSpeciesForm;
+  openModal(`
+    <h3>${title}</h3>
+    <div class="hint" style="margin-bottom:0.8rem">分类路径：${escapeHtml(path)}</div>
+    <div class="grid-2">
+      <div class="form-row"><label>中文正式名</label><input id="sp_chinese" value="${escapeHtml(f.chinese)}" placeholder="如：阳荷"></div>
+      <div class="form-row"><label>学名（拉丁，斜体）</label><input id="sp_latin" value="${escapeHtml(f.latin)}" placeholder="如：Zingiber striolatum" style="font-family:var(--serif);font-style:italic"></div>
+    </div>
+    <div class="form-row"><label>命名人（正体）</label><input id="sp_author" value="${escapeHtml(f.author)}" placeholder="如：Diels"></div>
+    <div class="form-row">
+      <label>记录条目</label>
+      <div class="record-entries" id="recordEntries"></div>
+      <button type="button" class="ghost mini" onclick="addRecordEntry()" style="margin-top:0.35rem">+ 添加记录条目</button>
+    </div>
+    <div class="form-row"><label>备注</label><textarea id="sp_notes">${escapeHtml(f.notes)}</textarea></div>
+    <div class="form-row"><label>参考文献</label><textarea id="sp_refs">${escapeHtml(f.refs)}</textarea></div>
+    <div class="form-actions"><button onclick="closeModal()">取消</button><button class="primary" onclick="saveSpecies()">保存</button></div>
+  `, 'lg');
+  renderRecordEntries();
+}
+
+function renderRecordEntries() {
+  const el = document.getElementById('recordEntries');
+  if (!el) return;
+  el.innerHTML = currentSpeciesForm.records.map((rec, i) => {
+    const regionList = (rec.regions || []).map((r, ri) => `
+      <div class="row row-4 region-row" data-region-idx="${ri}">
+        <div class="combo-sm" id="rc_province_${i}_${ri}"><input placeholder="省" value="${escapeHtml(r.province || '')}" autocomplete="off" oninput="updateRegionField(${i}, ${ri}, 'province', this.value)" onfocus="filterRegionCombo(${i}, ${ri}, 'province')"><div class="dropdown-list"></div></div>
+        <div class="combo-sm" id="rc_city_${i}_${ri}"><input placeholder="市" value="${escapeHtml(r.city || '')}" autocomplete="off" oninput="updateRegionField(${i}, ${ri}, 'city', this.value)" onfocus="filterRegionCombo(${i}, ${ri}, 'city')"><div class="dropdown-list"></div></div>
+        <div class="combo-sm" id="rc_county_${i}_${ri}"><input placeholder="县" value="${escapeHtml(r.county || '')}" autocomplete="off" oninput="updateRegionField(${i}, ${ri}, 'county', this.value)" onfocus="filterRegionCombo(${i}, ${ri}, 'county')"><div class="dropdown-list"></div></div>
+        <div style="display:flex;gap:0.25rem">
+          <input placeholder="乡镇" value="${escapeHtml(r.town || '')}" oninput="updateRegionField(${i}, ${ri}, 'town', this.value)" style="flex:1">
+          <input placeholder="描述" value="${escapeHtml(r.desc || '')}" oninput="updateRegionField(${i}, ${ri}, 'desc', this.value)" style="flex:1">
+          <button type="button" class="ghost danger mini" onclick="removeRegionEntry(${i}, ${ri})">×</button>
+        </div>
+      </div>
+    `).join('');
+
+    const nameList = (rec.names || []).map((n, ni) => `
+      <div class="row row-2" style="margin-bottom:0.35rem">
+        <input placeholder="俗名" value="${escapeHtml(n.text || '')}" oninput="updateNameField(${i}, ${ni}, 'text', this.value)">
+        <div style="display:flex;gap:0.25rem">
+          <input placeholder="IPA" value="${escapeHtml(n.ipa || '')}" oninput="updateNameField(${i}, ${ni}, 'ipa', this.value)" style="flex:1;font-family:var(--serif)">
+          <button type="button" class="ghost danger mini" onclick="removeNameEntry(${i}, ${ni})">×</button>
+        </div>
+      </div>
+    `).join('');
+
+    const langList = (rec.langPaths || []).map((lp, li) => `
+      <div class="row row-2" style="margin-bottom:0.35rem;align-items:center">
+        <input value="${escapeHtml(lp)}" readonly onclick="openLangPicker(${i}, ${li})" style="cursor:pointer" placeholder="点击选择语言">
+        <div style="display:flex;gap:0.25rem">
+          <button type="button" class="ghost mini" onclick="openLangPicker(${i}, ${li})">🗣️ 选语言</button>
+          <button type="button" class="ghost danger mini" onclick="removeLangEntry(${i}, ${li})">×</button>
+        </div>
+      </div>
+    `).join('');
+
+    return `
+    <details class="record-entry-form" ${i === 0 ? 'open' : ''}>
+      <summary class="entry-title">
+        <span>记录 ${i+1}${(rec.names && rec.names[0] && rec.names[0].text) ? '：' + escapeHtml(rec.names[0].text) : ''}</span>
+        <span class="entry-actions">
+          ${i > 0 ? `<button type="button" class="ghost mini" onclick="event.preventDefault();event.stopPropagation();copyPrevRecord(${i})">复制上条</button>` : ''}
+          <button type="button" class="ghost danger mini" onclick="event.preventDefault();event.stopPropagation();removeRecordEntry(${i})">删除</button>
+        </span>
+      </summary>
+      <div class="entry-body">
+        <span class="sub-label">地区（可添加多个）<button type="button" class="ghost mini" style="margin-left:0.35rem" onclick="addRegionEntry(${i})">+ 地区</button></span>
+        <div id="regionsList_${i}">${regionList || '<div style="font-size:0.75rem;color:var(--muted);padding:0.2rem 0">暂无地区</div>'}</div>
+        <span class="sub-label">民族（下拉可选已有，回车保存新 tag）</span>
+        <div class="tag-combo" id="ethnicPicker_${i}"></div>
+        <span class="sub-label">语言（可添加多个）<button type="button" class="ghost mini" style="margin-left:0.35rem" onclick="addLangEntry(${i})">+ 语言</button></span>
+        <div id="langList_${i}">${langList || '<div style="font-size:0.75rem;color:var(--muted);padding:0.2rem 0">暂无语言</div>'}</div>
+        <span class="sub-label">俗名 / IPA（可添加多个）<button type="button" class="ghost mini" style="margin-left:0.35rem" onclick="addNameEntry(${i})">+ 俗名</button></span>
+        <div id="namesList_${i}">${nameList || '<div style="font-size:0.75rem;color:var(--muted);padding:0.2rem 0">暂无俗名</div>'}</div>
+        <span class="sub-label">食用部位 / 食用方式 / 菜品 / 菜品详细做法 / 图片</span>
+        <div class="usage-list" id="usageList_${i}"></div>
+        <button type="button" class="ghost mini" onclick="addUsageEntry(${i})" style="margin-top:0.35rem">+ 添加部位组</button>
+      </div>
+    </details>`;
+  }).join('');
+  currentSpeciesForm.records.forEach((rec, i) => {
+    renderEthnicPicker(i);
+    renderUsageList(i);
+  });
+}
+
+function renderTagCombo(elId, getArr, setArr, metaKey, placeholder, tagClass) {
+  const el = document.getElementById(elId);
+  if (!el) return;
+  el.innerHTML = '';
+  const input = document.createElement('input');
+  input.placeholder = placeholder || '输入后回车添加…';
+  const dropdown = document.createElement('div');
+  dropdown.className = 'tag-dropdown';
+  el.appendChild(input);
+  el.appendChild(dropdown);
+
+  function renderPicked() {
+    el.querySelectorAll('.picked').forEach(n => n.remove());
+    const arr = getArr();
+    arr.forEach((l, idx) => {
+      const c = document.createElement('span');
+      c.className = 'picked ' + (tagClass || '');
+      c.innerHTML = `${escapeHtml(l)} <span class="x">×</span>`;
+      c.querySelector('.x').onclick = e => { e.stopPropagation(); const a = getArr(); a.splice(idx, 1); setArr(a); renderPicked(); };
+      el.insertBefore(c, input);
+    });
+  }
+  function renderDropdown() {
+    const q = input.value.trim().toLowerCase();
+    const lib = meta[metaKey] || [];
+    const filtered = q ? lib.filter(o => o.toLowerCase().includes(q)) : lib;
+    if (!filtered.length) dropdown.innerHTML = '<div class="empty">无匹配，回车保存新 tag</div>';
+    else dropdown.innerHTML = filtered.slice(0, 50).map((o, i) => `<div class="opt ${i===0?'hl':''}" data-i="${i}">${escapeHtml(o)}</div>`).join('');
+    dropdown.classList.add('open');
+    const first = dropdown.querySelector('.opt');
+    if (first) first.scrollIntoView({ block: 'nearest' });
+    dropdown.querySelectorAll('.opt').forEach(n => {
+      n.addEventListener('mousedown', e => { e.preventDefault(); addTag(filtered[+n.dataset.i]); });
+    });
+  }
+   function addTag(v) {
+     if (!v) return;
+     const arr = getArr();
+     // 当前记录里已经有这个 tag → 提示
+     if (arr.includes(v)) {
+      toast('这条记录里已经有「' + v + '」了', true);
+       input.value = '';
+       dropdown.classList.remove('open');
+       return;
+    }
+    arr.push(v); setArr(arr);
+    // 选项库里已有这个 tag → 静默去重；没有 → 加入选项库
+    saveMetaLib(metaKey, v);
+    input.value = ''; renderPicked(); dropdown.classList.remove('open');
+  }
+  input.addEventListener('input', renderDropdown);
+  input.addEventListener('focus', renderDropdown);
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ',') {
+      e.preventDefault();
+      const q = input.value.trim(); if (!q) return;
+      const lib = meta[metaKey] || [];
+      const first = lib.find(o => o.toLowerCase().includes(q.toLowerCase()));
+      addTag(first || q);
+    } else if (e.key === 'Backspace' && !input.value) {
+      const arr = getArr(); if (arr.length) { arr.pop(); setArr(arr); renderPicked(); }
+    } else if (e.key === 'Escape') dropdown.classList.remove('open');
+  });
+  renderPicked();
+}
+
+function renderEthnicPicker(recIdx) {
+  const rec = currentSpeciesForm.records[recIdx];
+  const getArr = () => rec.ethnic ? [rec.ethnic] : [];
+  const setArr = (arr) => { rec.ethnic = arr[arr.length - 1] || ''; };
+  renderTagCombo('ethnicPicker_' + recIdx, getArr, setArr, 'ethnicLib', '民族 输入后回车添加…', '');
+}
+
+function renderUsageList(recIdx) {
+  const el = document.getElementById('usageList_' + recIdx);
+  if (!el) return;
+  const rec = currentSpeciesForm.records[recIdx];
+  if (!rec.usages.length) rec.usages.push({ parts: [], ways: [{ tag: '', dish: '', method: '', photos: [], photoNames: [] }] });
+  el.innerHTML = rec.usages.map((u, ui) => `
+    <div class="usage-entry">
+      <div class="usage-head">
+        <span>部位组 ${ui+1}</span>
+        <button class="ghost danger mini" onclick="removeUsageEntry(${recIdx}, ${ui})">删除</button>
+      </div>
+      <div class="usage-parts-row">
+        <div class="tag-combo" id="usageParts_${recIdx}_${ui}"></div>
+      </div>
+      <div class="usage-ways-list" id="usageWays_${recIdx}_${ui}"></div>
+      <button type="button" class="ghost mini" onclick="addUsageWay(${recIdx}, ${ui})" style="margin-top:0.25rem">+ 添加吃法</button>
+    </div>
+  `).join('');
+  rec.usages.forEach((u, ui) => {
+    renderUsagePartsPicker(recIdx, ui);
+    renderUsageWays(recIdx, ui);
+  });
+}
+
+function renderUsagePartsPicker(recIdx, ui) {
+  const u = currentSpeciesForm.records[recIdx].usages[ui];
+  renderTagCombo('usageParts_' + recIdx + '_' + ui, () => u.parts, (arr) => { u.parts = arr; }, 'partsLib', '部位 输入后回车添加…', '');
+}
+
+function renderUsageWays(recIdx, ui) {
+  const el = document.getElementById('usageWays_' + recIdx + '_' + ui);
+  if (!el) return;
+  const u = currentSpeciesForm.records[recIdx].usages[ui];
+  if (!u.ways.length) u.ways.push({ tag: '', dish: '', method: '', photos: [], photoNames: [] });
+  el.innerHTML = u.ways.map((w, wi) => `
+    <div class="usage-way-row">
+      <div class="way-row-top">
+        <div class="tag-combo" id="wayTag_${recIdx}_${ui}_${wi}"></div>
+        <input placeholder="菜品名（如：凉拌阳荷）" value="${escapeHtml(w.dish || '')}" oninput="updateWay(${recIdx}, ${ui}, ${wi}, 'dish', this.value)">
+        <button type="button" class="ghost danger mini" onclick="removeUsageWay(${recIdx}, ${ui}, ${wi})">×</button>
+      </div>
+      <div class="way-row-method">
+        <span class="lbl">菜品详细做法</span>
+        <input placeholder="如：洗净切段，热油快炒，加盐" value="${escapeHtml(w.method || '')}" oninput="updateWay(${recIdx}, ${ui}, ${wi}, 'method', this.value)">
+      </div>
+      <span class="way-photos-label">图片（可多张，拖动排序，可填注释）</span>
+      <label class="upload-btn">+ 上传图片<input type="file" accept="image/*" multiple onchange="onWayPhotoUpload(event, ${recIdx}, ${ui}, ${wi})"></label>
+      <div class="way-photos-grid" id="wayPhotos_${recIdx}_${ui}_${wi}"></div>
+    </div>
+  `).join('');
+  u.ways.forEach((w, wi) => {
+    renderWayTagPicker(recIdx, ui, wi);
+    renderWayPhotosGrid(recIdx, ui, wi);
+  });
+}
+
+function renderWayTagPicker(recIdx, ui, wi) {
+  const w = currentSpeciesForm.records[recIdx].usages[ui].ways[wi];
+  renderTagCombo('wayTag_' + recIdx + '_' + ui + '_' + wi, () => w.tag ? [w.tag] : [], (arr) => { w.tag = arr[arr.length - 1] || ''; }, 'waysLib', '方式 如：炖汤、煸炒等', 'way-tag');
+}
+
+function renderWayPhotosGrid(recIdx, ui, wi) {
+  const el = document.getElementById('wayPhotos_' + recIdx + '_' + ui + '_' + wi);
+  if (!el) return;
+  const w = currentSpeciesForm.records[recIdx].usages[ui].ways[wi];
+  if (!w.photos) w.photos = [];
+  if (!w.photoNames) w.photoNames = w.photos.map(() => '');
+  while (w.photoNames.length < w.photos.length) w.photoNames.push('');
+  if (!w.photos.length) { el.innerHTML = '<div class="photos-empty" style="grid-column:1/-1">暂无图片</div>'; return; }
+  el.innerHTML = w.photos.map((p, pi) => {
+    const isCover = currentSpeciesForm.coverPhoto && currentSpeciesForm.coverPhoto === p;
+    return `<div class="photo-edit-item ${isCover?'is-cover':''}" data-idx="${pi}" draggable="true">
+      <span class="photo-num">${pi+1}</span>
+      <button class="photo-remove" onclick="removeWayPhoto(event, ${recIdx}, ${ui}, ${wi}, ${pi})">×</button>
+      <img src="${p}">
+      <button class="photo-cover" onclick="setCoverPhoto(event, ${recIdx}, ${ui}, ${wi}, ${pi})">${isCover ? '✓ 封面' : '设为封面'}</button>
+      <input class="photo-name-input" placeholder="图片注释" value="${escapeHtml(w.photoNames[pi] || '')}" oninput="updateWayPhotoName(${recIdx}, ${ui}, ${wi}, ${pi}, this.value)" onclick="event.stopPropagation()">
+    </div>`;
+  }).join('');
+  const items = el.querySelectorAll('.photo-edit-item');
+  let dragIdx = null;
+  items.forEach(item => {
+    item.addEventListener('dragstart', e => { dragIdx = +item.dataset.idx; item.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; });
+    item.addEventListener('dragend', () => { item.classList.remove('dragging'); items.forEach(i => i.classList.remove('drag-over')); });
+    item.addEventListener('dragover', e => { e.preventDefault(); item.classList.add('drag-over'); });
+    item.addEventListener('dragleave', () => item.classList.remove('drag-over'));
+    item.addEventListener('drop', e => {
+      e.preventDefault();
+      const targetIdx = +item.dataset.idx;
+      if (dragIdx === null || dragIdx === targetIdx) return;
+      const [movedPhoto] = w.photos.splice(dragIdx, 1);
+      const [movedName] = w.photoNames.splice(dragIdx, 1);
+      w.photos.splice(targetIdx, 0, movedPhoto);
+      w.photoNames.splice(targetIdx, 0, movedName);
+      renderWayPhotosGrid(recIdx, ui, wi);
+    });
+  });
+}
+
+function updateWayPhotoName(recIdx, ui, wi, pi, v) {
+  const w = currentSpeciesForm.records[recIdx].usages[ui].ways[wi];
+  if (!w.photoNames) w.photoNames = [];
+  w.photoNames[pi] = v;
+}
+
+async function onWayPhotoUpload(e, recIdx, ui, wi) {
+  const files = Array.from(e.target.files || []);
+  const w = currentSpeciesForm.records[recIdx].usages[ui].ways[wi];
+  if (!w.photos) w.photos = [];
+  if (!w.photoNames) w.photoNames = [];
+  try {
+    for (const f of files) {
+      const dataUrl = await compressImage(f);
+      w.photos.push(dataUrl);
+      w.photoNames.push('');
+    }
+    renderWayPhotosGrid(recIdx, ui, wi);
+  } catch (err) {
+    toast(err.message, true);
+  }
+  e.target.value = '';
+}
+function removeWayPhoto(e, recIdx, ui, wi, pi) {
+  e.stopPropagation();
+  const w = currentSpeciesForm.records[recIdx].usages[ui].ways[wi];
+  const removed = w.photos[pi];
+  w.photos.splice(pi, 1);
+  if (w.photoNames) w.photoNames.splice(pi, 1);
+  if (currentSpeciesForm.coverPhoto === removed) currentSpeciesForm.coverPhoto = '';
+  renderWayPhotosGrid(recIdx, ui, wi);
+}
+function setCoverPhoto(e, recIdx, ui, wi, pi) {
+  e.stopPropagation();
+  const w = currentSpeciesForm.records[recIdx].usages[ui].ways[wi];
+  currentSpeciesForm.coverPhoto = w.photos[pi];
+  currentSpeciesForm.records.forEach((r, ri) => {
+    r.usages.forEach((u, ui2) => {
+      u.ways.forEach((w2, wi2) => {
+        if (document.getElementById(`wayPhotos_${ri}_${ui2}_${wi2}`)) renderWayPhotosGrid(ri, ui2, wi2);
+      });
+    });
+  });
+}
+
+function updateRegionField(recIdx, regionIdx, key, v) {
+  const rec = currentSpeciesForm.records[recIdx];
+  if (!rec.regions) rec.regions = [];
+  if (!rec.regions[regionIdx]) rec.regions[regionIdx] = { province:'', city:'', county:'', town:'', desc:'' };
+  rec.regions[regionIdx][key] = v;
+}
+function addRegionEntry(recIdx) {
+  const rec = currentSpeciesForm.records[recIdx];
+  if (!rec.regions) rec.regions = [];
+  rec.regions.push({ province:'', city:'', county:'', town:'', desc:'' });
+  renderRecordEntries();
+}
+function removeRegionEntry(recIdx, regionIdx) {
+  const rec = currentSpeciesForm.records[recIdx];
+  if (!rec.regions) return;
+  rec.regions.splice(regionIdx, 1);
+  renderRecordEntries();
+}
+function updateNameField(recIdx, nameIdx, key, v) {
+  const rec = currentSpeciesForm.records[recIdx];
+  if (!rec.names) rec.names = [];
+  if (!rec.names[nameIdx]) rec.names[nameIdx] = { text:'', ipa:'' };
+  rec.names[nameIdx][key] = v;
+}
+function addNameEntry(recIdx) {
+  const rec = currentSpeciesForm.records[recIdx];
+  if (!rec.names) rec.names = [];
+  rec.names.push({ text:'', ipa:'' });
+  renderRecordEntries();
+}
+function removeNameEntry(recIdx, nameIdx) {
+  const rec = currentSpeciesForm.records[recIdx];
+  if (!rec.names) return;
+  rec.names.splice(nameIdx, 1);
+  renderRecordEntries();
+}
+function addLangEntry(recIdx) {
+  const rec = currentSpeciesForm.records[recIdx];
+  if (!rec.langPaths) rec.langPaths = [];
+  rec.langPaths.push('');
+  renderRecordEntries();
+}
+function removeLangEntry(recIdx, langIdx) {
+  const rec = currentSpeciesForm.records[recIdx];
+  if (!rec.langPaths) return;
+  rec.langPaths.splice(langIdx, 1);
+  renderRecordEntries();
+}
+function updateWay(recIdx, ui, wi, key, v) {
+  currentSpeciesForm.records[recIdx].usages[ui].ways[wi][key] = v;
+}
+function addRecordEntry() { currentSpeciesForm.records.push(newRecordEntry()); renderRecordEntries(); }
+function removeRecordEntry(i) {
+  if (currentSpeciesForm.records.length <= 1) { toast('至少保留一条记录'); return; }
+  currentSpeciesForm.records.splice(i, 1);
+  renderRecordEntries();
+}
+function copyPrevRecord(i) {
+  if (i === 0) return;
+  const prev = currentSpeciesForm.records[i-1];
+  const cur = currentSpeciesForm.records[i];
+  cur.regions = JSON.parse(JSON.stringify(prev.regions || []));
+  cur.ethnic = prev.ethnic;
+  cur.langPaths = [...(prev.langPaths || [])];
+  renderRecordEntries();
+}
+
+f
+function addUsageEntry(recIdx) {
+  currentSpeciesForm.records[recIdx].usages.push({ parts: [], ways: [{ tag: '', dish: '', method: '', photos: [], photoNames: [] }] });
+  renderUsageList(recIdx);
+}
+function removeUsageEntry(recIdx, ui) {
+  const u = currentSpeciesForm.records[recIdx].usages;
+  if (u.length <= 1) { u.length = 0; u.push({ parts: [], ways: [{ tag: '', dish: '', method: '', photos: [], photoNames: [] }] }); }
+  else u.splice(ui, 1);
+  renderUsageList(recIdx);
+}
+function addUsageWay(recIdx, ui) {
+  currentSpeciesForm.records[recIdx].usages[ui].ways.push({ tag: '', dish: '', method: '', photos: [], photoNames: [] });
+  renderUsageWays(recIdx, ui);
+}
+function removeUsageWay(recIdx, ui, wi) {
+  const ways = currentSpeciesForm.records[recIdx].usages[ui].ways;
+  if (ways.length <= 1) { ways.length = 0; ways.push({ tag: '', dish: '', method: '', photos: [], photoNames: [] }); }
+  else ways.splice(wi, 1);
+  renderUsageWays(recIdx, ui);
+}
+
+async function saveMetaLib(metaKey, v) {
+  if (!meta[metaKey]) meta[metaKey] = [];
+  if (meta[metaKey].includes(v)) {
+    // 已存在，不重复加入，也不弹窗（因为在保存词条时调用，弹窗太频繁）
+    return;
+  }
+  meta[metaKey].push(v);
+  await dbPut('meta', { key: metaKey, value: meta[metaKey] });
+}
+
+function filterRegionCombo(recIdx, regionIdx, level) {
+  const wrap = document.getElementById(`rc_${level}_${recIdx}_${regionIdx}`);
+  if (!wrap) return;
+  const input = wrap.querySelector('input');
+  const dropdown = wrap.querySelector('.dropdown-list');
+  const q = input.value.trim().toLowerCase();
+  const rec = currentSpeciesForm.records[recIdx];
+  if (!rec.regions) rec.regions = [];
+  if (!rec.regions[regionIdx]) rec.regions[regionIdx] = { province:'', city:'', county:'', town:'', desc:'' };
+  const entry = rec.regions[regionIdx];
+  if (!REGION_DATA) {
+    dropdown.innerHTML = '<div class="empty">正在加载省市区数据…</div>';
+    dropdown.classList.add('open');
+    loadRegionData().then(() => filterRegionCombo(recIdx, regionIdx, level));
+    return;
+  }
+  let opts = [];
+  if (level === 'province') opts = Object.keys(REGION_DATA);
+  else if (level === 'city') {
+    const p = entry.province;
+    if (p && REGION_DATA[p]) opts = Object.keys(REGION_DATA[p]);
+  } else if (level === 'county') {
+    const p = entry.province, c = entry.city;
+    if (p && c && REGION_DATA[p] && REGION_DATA[p][c]) opts = Object.keys(REGION_DATA[p][c]);
+  }
+  const filtered = q ? opts.filter(o => o.toLowerCase().includes(q)) : opts;
+  if (!filtered.length) { dropdown.classList.remove('open'); return; }
+  // 高亮第一个匹配项
+  dropdown.innerHTML = filtered.slice(0, 100).map((o, i) =>
+    `<div class="opt ${i === 0 ? 'hl' : ''}" data-i="${i}">${escapeHtml(o)}</div>`
+  ).join('');
+  dropdown.classList.add('open');
+  // 滚动到第一个匹配项
+  const first = dropdown.querySelector('.opt');
+  if (first) first.scrollIntoView({ block: 'nearest' });
+  dropdown.querySelectorAll('.opt').forEach(n => {
+    n.addEventListener('mousedown', e => {
+      e.preventDefault();
+      const v = filtered[+n.dataset.i];
+      input.value = v;
+      entry[level] = v;
+      if (level === 'province') { entry.city = ''; entry.county = ''; }
+      else if (level === 'city') { entry.county = ''; }
+      renderRecordEntries();
+    });
+  });
+}
+
+
+function openLangPicker(recIdx, langIdx) {
+  modalContext = { langPickerFor: recIdx, langIdx, fromSpeciesForm: true };
+  const langRoot = getLangNode('lang_root');
+  if (!langRoot) { toast('语言树为空'); return; }
+  saveSpeciesFormToCurrent();
+  openModal(`
+    <h3>选择语言</h3>
+    <div class="hint" style="margin-bottom:0.6rem">从语言树中选择一个节点。</div>
+    <div class="lang-tree" id="langPickerTree"></div>
+    <div class="form-actions"><button onclick="cancelLangPicker()">取消</button><button onclick="clearLangPicker()">清空</button></div>
+  `, 'sm');
+  renderLangPickerTree();
+}
+
+function saveSpeciesFormToCurrent() {
+  const f = currentSpeciesForm;
+  if (!f) return;
+  const ids = ['sp_chinese', 'sp_latin', 'sp_author', 'sp_notes', 'sp_refs'];
+  const keys = ['chinese', 'latin', 'author', 'notes', 'refs'];
+  ids.forEach((id, i) => { const el = document.getElementById(id); if (el) f[keys[i]] = el.value; });
+}
+
+function renderLangPickerTree() {
+  const container = document.getElementById('langPickerTree');
+  if (!container) return;
+  container.innerHTML = '';
+  function renderNodeTo(node, container) {
+    const children = sortTreeChildren((node.children || []).map(cid => getLangNode(cid)).filter(Boolean));
+    const div = document.createElement('div');
+    div.className = 'lang-node';
+    const recIdx = modalContext.langPickerFor;
+    const langIdx = modalContext.langIdx;
+    const curPath = (currentSpeciesForm.records[recIdx] && currentSpeciesForm.records[recIdx].langPaths && currentSpeciesForm.records[recIdx].langPaths[langIdx]) || '';
+    const isSelected = curPath === buildLangPath(node.id);
+    div.innerHTML = `<div class="lang-label ${isSelected ? 'selected' : ''}">${escapeHtml(node.cn)} ${node.rankName ? `<span style="font-size:0.7rem;color:var(--muted);font-style:italic">${escapeHtml(node.rankName)}</span>` : ''}</div>`;
+    div.querySelector('.lang-label').onclick = () => pickLangPath(node.id);
+    container.appendChild(div);
+    if (children.length) {
+      const childDiv = document.createElement('div');
+      childDiv.className = 'lang-children';
+      container.appendChild(childDiv);
+      children.forEach(c => renderNodeTo(c, childDiv));
+    }
+  }
+  const root = getLangNode('lang_root');
+  const rootChildren = sortTreeChildren((root.children || []).map(cid => getLangNode(cid)).filter(Boolean));
+  rootChildren.forEach(c => renderNodeTo(c, container));
+}
+
+function pickLangPath(id) {
+  const recIdx = modalContext.langPickerFor;
+  const langIdx = modalContext.langIdx;
+  const rec = currentSpeciesForm.records[recIdx];
+  if (!rec.langPaths) rec.langPaths = [];
+  rec.langPaths[langIdx] = buildLangPath(id);
+  const title = currentSpeciesForm.id ? '编辑物种/词条' : '新增物种/词条';
+  renderSpeciesForm(title);
+}
+
+function clearLangPicker() {
+  const recIdx = modalContext.langPickerFor;
+  const langIdx = modalContext.langIdx;
+  const rec = currentSpeciesForm.records[recIdx];
+  if (!rec.langPaths) rec.langPaths = [];
+  rec.langPaths[langIdx] = '';
+  const title = currentSpeciesForm.id ? '编辑物种/词条' : '新增物种/词条';
+  renderSpeciesForm(title);
+}
+
+function cancelLangPicker() {
+  const title = currentSpeciesForm.id ? '编辑物种/词条' : '新增物种/词条';
+  renderSpeciesForm(title);
+}
+
+async function saveSpecies() {
+  const chinese = document.getElementById('sp_chinese').value.trim();
+  const latin = document.getElementById('sp_latin').value.trim();
+  const author = document.getElementById('sp_author').value.trim();
+  if (!chinese && !latin) { toast('请至少填写中文名或学名'); return; }
+  const records = currentSpeciesForm.records.map(r => ({
+    regions: (r.regions || []).map(rg => ({
+      province: (rg.province || '').trim(),
+      city: (rg.city || '').trim(),
+      county: (rg.county || '').trim(),
+      town: (rg.town || '').trim(),
+      desc: (rg.desc || '').trim()
+    })).filter(rg => rg.province || rg.city || rg.county || rg.town || rg.desc),
+    ethnic: (r.ethnic || '').trim(),
+    langPaths: (r.langPaths || []).filter(Boolean),
+    names: (r.names || []).filter(n => (n.text || '').trim() || (n.ipa || '').trim()).map(n => ({ text: (n.text || '').trim(), ipa: (n.ipa || '').trim() })),
+    usages: (r.usages || []).map(u => ({
+      parts: (u.parts || []).filter(Boolean),
+      ways: (u.ways || []).filter(w => w.tag || w.dish || w.method || (w.photos && w.photos.length)).map(w => ({
+        tag: (w.tag || '').trim(), dish: (w.dish || '').trim(), method: (w.method || '').trim(),
+        photos: (w.photos || []).slice(),
+        photoNames: (w.photoNames || []).slice()
+      }))
+    })).filter(u => u.parts.length || u.ways.length)
+  })).filter(r => r.names.length || r.usages.length || r.langPaths.length || r.ethnic || r.regions.length);
+
+  const notes = document.getElementById('sp_notes').value.trim();
+  const refs = document.getElementById('sp_refs').value.trim();
+  for (const r of records) {
+    if (r.ethnic) await saveMetaLib('ethnicLib', r.ethnic);
+    for (const u of r.usages) {
+      for (const p of u.parts) await saveMetaLib('partsLib', p);
+      for (const w of u.ways) { if (w.tag) await saveMetaLib('waysLib', w.tag); if (w.dish) await saveMetaLib('dishesLib', w.dish); }
+    }
+  }
+  const isNew = !currentSpeciesForm.id;
+  const id = currentSpeciesForm.id || 's_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
+  const speciesNode = {
+    id, type: 'species', parentId: currentSpeciesForm.parentId,
+    chinese, latin, author, records, notes, refs,
+    coverPhoto: currentSpeciesForm.coverPhoto || '',
+    children: isNew ? [] : (getNode(id)?.children || []),
+    photos: isNew ? [] : (getNode(id)?.photos || [])
+  };
+  await dbPut('nodes', speciesNode);
+  if (isNew && currentSpeciesForm.parentId) {
+    const parent = getNode(currentSpeciesForm.parentId);
+    if (parent) {
+      if (!parent.children) parent.children = [];
+      parent.children.push(id);
+      await dbPut('nodes', parent);
+    }
+  }
+  nodes = await dbGetAll('nodes');
+  closeModal();
+  currentSelection = id;
+  expandedNodes = new Set();
+  expandAncestors(id, 'taxon');
+  renderTree(); renderMain(); scrollTreeToSelected();
+  toast(isNew ? '已添加物种' : '已更新');
+}
+
+/* ============================================================
+   高级搜索
+   ============================================================ */
+function openAdvancedSearch() {
+  currentAdvSearch = {
+    chineseLatin: '', family: '', genus: '',
+    province: '', city: '', county: '', town: '',
+    ethnic: '', langPath: '', commonName: '',
+    parts: [], ways: [], dish: '', method: '', refs: ''
+  };
+  openModal(`
+    <h3>🔍 高级搜索</h3>
+    <div class="search-form-grid">
+      <div class="form-row full"><label>中文名 / 学名</label><div class="search-combo" id="advCombo_chineseLatin"><input placeholder="输入中文名或学名…" autocomplete="off" oninput="filterAdvCombo('chineseLatin', this.value)" onfocus="filterAdvCombo('chineseLatin', this.value)"><div class="dropdown-list"></div></div></div>
+      <div class="form-row"><label>科</label><div class="search-combo" id="advCombo_family"><input placeholder="科" autocomplete="off" oninput="filterAdvCombo('family', this.value)" onfocus="filterAdvCombo('family', this.value)"><div class="dropdown-list"></div></div></div>
+      <div class="form-row"><label>属</label><div class="search-combo" id="advCombo_genus"><input placeholder="属" autocomplete="off" oninput="filterAdvCombo('genus', this.value)" onfocus="filterAdvCombo('genus', this.value)"><div class="dropdown-list"></div></div></div>
+      <div class="form-row"><label>省</label><div class="search-combo" id="advCombo_province"><input placeholder="省" autocomplete="off" oninput="filterAdvCombo('province', this.value)" onfocus="filterAdvCombo('province', this.value)"><div class="dropdown-list"></div></div></div>
+      <div class="form-row"><label>市</label><div class="search-combo" id="advCombo_city"><input placeholder="市" autocomplete="off" oninput="filterAdvCombo('city', this.value)" onfocus="filterAdvCombo('city', this.value)"><div class="dropdown-list"></div></div></div>
+      <div class="form-row"><label>县</label><div class="search-combo" id="advCombo_county"><input placeholder="县" autocomplete="off" oninput="filterAdvCombo('county', this.value)" onfocus="filterAdvCombo('county', this.value)"><div class="dropdown-list"></div></div></div>
+      <div class="form-row"><label>乡镇</label><div class="search-combo" id="advCombo_town"><input placeholder="乡镇" autocomplete="off" oninput="filterAdvCombo('town', this.value)" onfocus="filterAdvCombo('town', this.value)"><div class="dropdown-list"></div></div></div>
+      <div class="form-row"><label>民族</label><div class="search-combo" id="advCombo_ethnic"><input placeholder="民族" autocomplete="off" oninput="filterAdvCombo('ethnic', this.value)" onfocus="filterAdvCombo('ethnic', this.value)"><div class="dropdown-list"></div></div></div>
+      <div class="form-row"><label>语言</label><div class="search-combo" id="advCombo_langPath"><input placeholder="语言路径" autocomplete="off" oninput="filterAdvCombo('langPath', this.value)" onfocus="filterAdvCombo('langPath', this.value)"><div class="dropdown-list"></div></div></div>
+      <div class="form-row"><label>俗名</label><div class="search-combo" id="advCombo_commonName"><input placeholder="俗名" autocomplete="off" oninput="filterAdvCombo('commonName', this.value)" onfocus="filterAdvCombo('commonName', this.value)"><div class="dropdown-list"></div></div></div>
+      <div class="form-row full"><label>食用部位</label><div class="tag-combo" id="advPartPicker"></div></div>
+      <div class="form-row full"><label>食用方式</label><div class="tag-combo" id="advWayPicker"></div></div>
+      <div class="form-row"><label>菜品名</label><div class="search-combo" id="advCombo_dish"><input placeholder="菜品名" autocomplete="off" oninput="filterAdvCombo('dish', this.value)" onfocus="filterAdvCombo('dish', this.value)"><div class="dropdown-list"></div></div></div>
+      <div class="form-row"><label>菜品详细做法</label><div class="search-combo" id="advCombo_method"><input placeholder="做法关键词" autocomplete="off" oninput="filterAdvCombo('method', this.value)" onfocus="filterAdvCombo('method', this.value)"><div class="dropdown-list"></div></div></div>
+      <div class="form-row"><label>参考文献</label><input placeholder="文献关键词" oninput="currentAdvSearch.refs = this.value"></div>
+    </div>
+    <div class="form-actions"><button onclick="closeModal()">取消</button><button onclick="clearAdvSearch()">清空</button><button class="primary" onclick="runAdvSearch()">搜索</button></div>
+  `, 'lg');
+  renderTagCombo('advPartPicker', () => currentAdvSearch.parts, (arr) => { currentAdvSearch.parts = arr; }, 'partsLib', '部位 输入后回车…', '');
+  renderTagCombo('advWayPicker', () => currentAdvSearch.ways, (arr) => { currentAdvSearch.ways = arr; }, 'waysLib', '如：炖汤、煸炒等', 'way-tag');
+}
+
+function clearAdvSearch() {
+  currentAdvSearch = { chineseLatin:'', family:'', genus:'', province:'', city:'', county:'', town:'', ethnic:'', langPath:'', commonName:'', parts:[], ways:[], dish:'', method:'', refs:'' };
+  document.querySelectorAll('#modalBody .search-combo input').forEach(i => i.value = '');
+  renderTagCombo('advPartPicker', () => currentAdvSearch.parts, (arr) => { currentAdvSearch.parts = arr; }, 'partsLib', '部位 输入后回车…', '');
+  renderTagCombo('advWayPicker', () => currentAdvSearch.ways, (arr) => { currentAdvSearch.ways = arr; }, 'waysLib', '如：炖汤、煸炒等', 'way-tag');
+}
+
+function filterAdvCombo(field, q) {
+  const wrap = document.getElementById('advCombo_' + field);
+  if (!wrap) return;
+  const input = wrap.querySelector('input');
+  const dropdown = wrap.querySelector('.dropdown-list');
+  let opts = [];
+  const lower = q.toLowerCase();
+  if (field === 'chineseLatin') {
+    nodes.filter(n => n.type === 'species').forEach(n => {
+      if (n.chinese) opts.push({ value: n.chinese, label: n.chinese, latin: n.latin || '' });
+      if (n.latin) opts.push({ value: n.latin, label: n.latin, latin: n.chinese || '' });
+    });
+  } else if (field === 'family') {
+    const seen = new Set();
+    nodes.forEach(n => { if (n.type === 'rank' && n.rankName === '科' && n.cn && !seen.has(n.cn)) { opts.push({ value: n.cn }); seen.add(n.cn); } });
+  } else if (field === 'genus') {
+    const seen = new Set();
+    nodes.forEach(n => { if (n.type === 'rank' && n.rankName === '属' && n.cn && !seen.has(n.cn)) { opts.push({ value: n.cn }); seen.add(n.cn); } });
+  } else if (field === 'province' || field === 'city' || field === 'county' || field === 'town') {
+    const seen = new Set();
+    collectAllRecords().forEach(({rec}) => {
+      const norm = normalizeRecord(rec);
+      (norm.regions || []).forEach(r => { const v = r[field]; if (v && !seen.has(v)) { opts.push({value:v}); seen.add(v); } });
+    });
+  } else if (field === 'ethnic') {
+    const seen = new Set();
+    collectAllRecords().forEach(({rec}) => { if (rec.ethnic && !seen.has(rec.ethnic)) { opts.push({value:rec.ethnic}); seen.add(rec.ethnic); } });
+  } else if (field === 'langPath') {
+    const seen = new Set();
+    collectAllRecords().forEach(({rec}) => {
+      const norm = normalizeRecord(rec);
+      (norm.langPaths || []).forEach(lp => { if (lp && !seen.has(lp)) { opts.push({value:lp}); seen.add(lp); } });
+    });
+  } else if (field === 'commonName') {
+    const seen = new Set();
+    collectAllRecords().forEach(({rec}) => {
+      const norm = normalizeRecord(rec);
+      (norm.names || []).forEach(nm => { if (nm.text && !seen.has(nm.text)) { opts.push({value:nm.text}); seen.add(nm.text); } });
+    });
+  } else if (field === 'dish') {
+    const seen = new Set();
+    collectAllRecords().forEach(({rec}) => (rec.usages||[]).forEach(u => (u.ways||[]).forEach(w => { if (w.dish && !seen.has(w.dish)) { opts.push({value:w.dish}); seen.add(w.dish); } })));
+  } else if (field === 'method') {
+    const seen = new Set();
+    collectAllRecords().forEach(({rec}) => (rec.usages||[]).forEach(u => (u.ways||[]).forEach(w => { if (w.method && !seen.has(w.method)) { opts.push({value:w.method}); seen.add(w.method); } })));
+  }
+  const filtered = lower ? opts.filter(o => o.value.toLowerCase().includes(lower)) : opts;
+  if (!filtered.length) { dropdown.classList.remove('open'); return; }
+  dropdown.innerHTML = filtered.slice(0, 80).map((o, i) => `<div class="opt ${i===0?'hl':''}" data-i="${i}"><span>${escapeHtml(o.value)}</span>${o.latin ? `<span class="opt-latin">${escapeHtml(o.latin)}</span>` : ''}</div>`).join('');
+  dropdown.classList.add('open');
+  const first = dropdown.querySelector('.opt');
+  if (first) first.scrollIntoView({ block: 'nearest' });
+  dropdown.querySelectorAll('.opt').forEach(n => {
+    n.addEventListener('mousedown', e => {
+      e.preventDefault();
+      const o = filtered[+n.dataset.i];
+      input.value = o.value;
+      currentAdvSearch[field] = o.value;
+      dropdown.classList.remove('open');
+    });
+  });
+}
+
+
+function runAdvSearch() {
+  const q = currentAdvSearch;
+  const results = [];
+  nodes.filter(n => n.type === 'species').forEach(n => {
+    if (q.chineseLatin) {
+      const cl = q.chineseLatin.toLowerCase();
+      if (!((n.chinese || '').toLowerCase().includes(cl) || (n.latin || '').toLowerCase().includes(cl))) return;
+    }
+    if (q.family && !pathHasRank(n.id, '科', q.family)) return;
+    if (q.genus && !pathHasRank(n.id, '属', q.genus)) return;
+    if (q.refs && !(n.refs || '').toLowerCase().includes(q.refs.toLowerCase())) return;
+    const matchedRecords = (n.records || []).map(r => normalizeRecord({ ...r })).filter(rec => {
+      if (q.province && !(rec.regions || []).some(r => r.province === q.province)) return false;
+      if (q.city && !(rec.regions || []).some(r => r.city === q.city)) return false;
+      if (q.county && !(rec.regions || []).some(r => r.county === q.county)) return false;
+      if (q.town && !(rec.regions || []).some(r => r.town === q.town)) return false;
+      if (q.ethnic && rec.ethnic !== q.ethnic) return false;
+      if (q.langPath && !(rec.langPaths || []).includes(q.langPath)) return false;
+      if (q.commonName && !(rec.names || []).some(nm => nm.text === q.commonName)) return false;
+      if (q.parts.length && !q.parts.every(p => (rec.usages||[]).some(u => (u.parts||[]).includes(p)))) return false;
+      if (q.ways.length && !q.ways.every(w => (rec.usages||[]).some(u => (u.ways||[]).some(x => x.tag === w)))) return false;
+      if (q.dish && !(rec.usages||[]).some(u => (u.ways||[]).some(x => (x.dish||'').toLowerCase().includes(q.dish.toLowerCase())))) return false;
+      if (q.method && !(rec.usages||[]).some(u => (u.ways||[]).some(x => (x.method||'').toLowerCase().includes(q.method.toLowerCase())))) return false;
+      return true;
+    });
+    if (matchedRecords.length) results.push({ node: n, records: matchedRecords });
+  });
+  closeModal();
+  renderAdvResults(results);
+}
+
+
+function pathHasRank(nodeId, rankName, cn) {
+  let cur = getNode(nodeId);
+  while (cur) {
+    if (cur.rankName === rankName && cur.cn === cn) return true;
+    cur = cur.parentId ? getNode(cur.parentId) : null;
+  }
+  return false;
+}
+
+function renderAdvResults(results) {
+  currentView = 'advResults';
+  const el = document.getElementById('mainContent');
+  document.getElementById('emptyState').style.display = 'none';
+  el.style.display = 'block';
+  el.innerHTML = `
+    <div class="index-page">
+      <h2>🔍 搜索结果</h2>
+      <div class="desc">共 ${results.length} 个物种符合条件</div>
+      ${results.length ? results.map(({node, records}) => `
+        <div class="record-list-item" onclick="selectNode('${node.id}')">
+          <span class="li-title">${escapeHtml(node.chinese || '未命名')}</span>
+          <span class="li-latin">${escapeHtml(node.latin || '')}</span>
+          <span class="li-meta">${records.length} 条匹配记录</span>
+        </div>`).join('') : '<div class="empty">无匹配结果</div>'}
+    </div>`;
+}
+
+let toastTimer;
+function toast(msg, warn) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.toggle('warn', !!warn);
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2500);
+}
+
+function exportJSON() {
+  const data = { nodes, langNodes, meta };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  const now = new Date();
+  const pad = (n) => String(n).padStart(2, '0');
+  const ts = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}-${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
+  a.download = `edobotany-${ts}.json`;
+  a.click();
+  toast('已导出');
+}
+
+async function importJSON(e) {
+  const f = e.target.files[0];
+  if (!f) return;
+  const text = await f.text();
+  let data;
+  try {
+    data = JSON.parse(text);
+  } catch (err) {
+    toast('JSON 解析失败：' + err.message, true);
+    e.target.value = '';
+    return;
+  }
+  const list = Array.isArray(data) ? data : (data.nodes || []);
+  if (!list.length) { toast('文件里没有 nodes 数据', true); e.target.value = ''; return; }
+  const append = confirm('确定=追加，取消=替换当前数据');
+  if (!append) {
+    await dbClear('nodes'); await dbClear('langNodes'); await dbClear('meta');
+  }
+  for (const n of list) await dbPut('nodes', n);
+  if (data.langNodes) for (const n of data.langNodes) await dbPut('langNodes', n);
+  if (data.meta) for (const [k, v] of Object.entries(data.meta)) await dbPut('meta', { key: k, value: v });
+  nodes = await dbGetAll('nodes');
+  langNodes = await dbGetAll('langNodes');
+  const metaArr = await dbGetAll('meta');
+  meta = {};
+  metaArr.forEach(m => { meta[m.key] = m.value; });
+  renderTree(); renderMain();
+  toast(`导入完成：${list.length} 个分类节点`);
+  e.target.value = '';
+}
+
+function escapeHtml(s) {
+  if (s == null) return '';
+  return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+function esc(s) { return String(s || '').replace(/'/g, "\\'").replace(/"/g, '&quot;'); }
+
+function toggleFontMode() {
+  const cur = localStorage.getItem('dhi_font_mode') || 'sans';
+  const next = cur === 'sans' ? 'serif' : 'sans';
+  localStorage.setItem('dhi_font_mode', next);
+  document.body.classList.toggle('font-mode-sans', next === 'sans');
+  document.body.classList.toggle('font-mode-serif', next === 'serif');
+  toast(next === 'sans' ? '已切换为无衬线' : '已切换为衬线');
+}
+
+function getPinyinInitial(s) {
+  if (!s) return '#';
+  const ch = s.trim()[0];
+  if (!ch) return '#';
+  if (/[a-zA-Z]/.test(ch)) return ch.toUpperCase();
+  if (/[0-9]/.test(ch)) return '#';
+  if (typeof pinyinPro !== 'undefined') {
+    try {
+      const p = pinyinPro.pinyin(ch, { pattern: 'first', toneType: 'none' });
+      const letter = (p || '').toUpperCase().replace(/[^A-Z]/g, '');
+      return letter || '#';
+    } catch (e) { return '#'; }
+  }
+  return '#';
+}
+
+function getLatinInitial(s) {
+  if (!s) return '#';
+  const ch = s.trim()[0];
+  if (!ch) return '#';
+  const letter = ch.toUpperCase();
+  return /[A-Z]/.test(letter) ? letter : '#';
+}
+
+/* 用字母分组渲染索引，避免每次输入重绘整个页面 */
+function renderLetterGroups(el, title, entries, mapper, placeholder) {
+  // entries: [{key, list}, ...]
+  const mapped = entries.map(e => {
+    const m = mapper(e);
+    return { letter: m.letter, sortKey: m.sortKey, html: m.html };
+  });
+  mapped.sort((a, b) => a.sortKey.localeCompare(b.sortKey));
+  const groups = {};
+  mapped.forEach(m => {
+    if (!groups[m.letter]) groups[m.letter] = [];
+    groups[m.letter].push(m);
+  });
+  const letters = Object.keys(groups).sort();
+
+  el.innerHTML = `<div class="index-page"><h2>${title}</h2><div class="desc">共 ${entries.length} 条。</div>
+      <div class="index-search"><input placeholder="${placeholder}（回车搜索）" value="${escapeHtml(indexSearchQuery)}" oninput="onIndexSearchInput(this.value)" onkeydown="if(event.key==='Enter'){event.preventDefault();onIndexSearchEnter();}" id="indexSearchInput"></div>
+    <div id="indexGroups">${letters.map(letter => `
+      <div class="dict-group">
+        <div class="dict-letter">${escapeHtml(letter)}</div>
+        ${groups[letter].map(g => g.html).join('')}
+      </div>`).join('')}
+    </div>
+  </div>`;
+}
+
+function onIndexSearchInput(v) {
+  indexSearchQuery = v;
+  // 不再自动重渲染，等用户按回车
+}
+function onIndexSearchEnter() {
+  renderIndexPage();
+  const input = document.getElementById('indexSearchInput');
+  if (input) {
+    input.focus();
+    input.setSelectionRange(input.value.length, input.value.length);
+  }
+}
+
+/* ============================================================
+   标签管理
+   ============================================================ */
+const TAG_LIB_LABELS = {
+  partsLib: '食用部位',
+  waysLib: '食用方式',
+  ethnicLib: '民族',
+  customRanks: '自定义分类阶元',
+  customLangRanks: '自定义语言阶元'
+};
+
+function openTagManager() {
+  let html = `<h3>🏷️ 标签管理</h3>`;
+  html += `<div class="hint" style="margin-bottom:0.8rem">点击 × 删除，点击文字重命名。删除会同步清理词条里的该 tag。重命名只改选项库，已录入的 tag 不会自动同步。</div>`;
+  html += `<div style="display:flex;gap:0.8rem;align-items:flex-start;max-height:32rem;overflow-y:auto;padding-bottom:0.4rem">`;
+  Object.entries(TAG_LIB_LABELS).forEach(([key, label]) => {
+    const raw = meta[key] || [];
+    const mapped = raw.map(t => ({ tag: t, letter: getPinyinInitial(t), sortKey: getPinyinForSort(t) }));
+    mapped.sort((a, b) => a.sortKey.localeCompare(b.sortKey));
+    const groups = {};
+    mapped.forEach(m => {
+      if (!groups[m.letter]) groups[m.letter] = [];
+      groups[m.letter].push(m.tag);
+    });
+    const letters = Object.keys(groups).sort();
+    html += `<div style="flex:1 1 0;min-width:0;border-right:1px solid var(--border-light);padding-right:0.6rem">
+      <div style="font-size:0.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:0.45rem">${label} <span style="font-weight:400">(${raw.length})</span></div>`;
+    if (!raw.length) {
+      html += `<div style="font-size:0.8rem;color:var(--muted);padding:0.2rem 0">暂无</div>`;
+    } else {
+      letters.forEach(letter => {
+        html += `<div style="margin-bottom:0.45rem">
+          <div style="font-size:0.7rem;font-weight:700;color:var(--primary);margin-bottom:0.2rem">${escapeHtml(letter)}</div>
+          <div style="display:flex;flex-direction:column;gap:0.25rem">`;
+        groups[letter].forEach(t => {
+          html += `<span style="display:inline-flex;align-items:center;justify-content:space-between;padding:0.15rem 0.3rem 0.15rem 0.5rem;border:1px solid var(--border);border-radius:0.6rem;font-size:0.78rem;background:var(--card)">
+            <span style="cursor:pointer;padding-right:0.4rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" onclick="renameTag('${esc(key)}','${esc(t)}')" title="点击重命名">${escapeHtml(t)}</span>
+            <span style="cursor:pointer;color:var(--danger);font-weight:700;padding:0.1rem 0.4rem;border-left:1px solid var(--border);line-height:1;flex-shrink:0" onclick="deleteTag('${esc(key)}','${esc(t)}')" title="删除">×</span>
+          </span>`;
+        });
+        html += `</div></div>`;
+      });
+    }
+    html += `</div>`;
+  });
+  html += `</div>`;
+  html += `<div class="form-actions"><button onclick="closeModal()">关闭</button></div>`;
+  // 用 lg 尺寸让模态框宽一些，五列才排得下
+  openModal(html, 'lg');
+}
+
+async function deleteTag(libKey, tagValue) {
+  if (!meta[libKey]) return;
+  const isRankLib = libKey === 'customRanks' || libKey === 'customLangRanks';
+  const libLabel = TAG_LIB_LABELS[libKey] || libKey;
+
+  let confirmMsg = `确定从「${libLabel}」的选项库里删除「${tagValue}」？`;
+  if (isRankLib) {
+    confirmMsg += `\n\n这是阶元名，已建成的分类树节点不受影响，只是以后新建时不再有它作为候选。`;
+  } else {
+    confirmMsg += `\n\n所有词条里用到这个 tag 的地方也会一起清掉。`;
+  }
+  if (!confirm(confirmMsg)) return;
+  if (!isRankLib) {
+    if (!confirm(`再次确认：删除「${tagValue}」并从所有词条里清除？此操作不可撤销。`)) return;
+  }
+
+  // 1. 从 meta 里删
+  meta[libKey] = meta[libKey].filter(t => t !== tagValue);
+  await dbPut('meta', { key: libKey, value: meta[libKey] });
+
+  // 2. 清理所有词条（只处理 tag 类库）
+  if (!isRankLib) {
+    let changed = 0;
+    for (const node of nodes) {
+      if (node.type !== 'species') continue;
+      let nodeChanged = false;
+      (node.records || []).forEach(rec => {
+        if (libKey === 'partsLib') {
+          (rec.usages || []).forEach(u => {
+            if ((u.parts || []).includes(tagValue)) {
+              u.parts = u.parts.filter(p => p !== tagValue);
+              nodeChanged = true;
+            }
+          });
+        } else if (libKey === 'waysLib') {
+          (rec.usages || []).forEach(u => {
+            (u.ways || []).forEach(w => {
+              if (w.tag === tagValue) { w.tag = ''; nodeChanged = true; }
+            });
+          });
+        } else if (libKey === 'ethnicLib') {
+          if (rec.ethnic === tagValue) { rec.ethnic = ''; nodeChanged = true; }
+        }
+      });
+      if (nodeChanged) {
+        await dbPut('nodes', node);
+        changed++;
+      }
+    }
+    nodes = await dbGetAll('nodes');
+    if (changed > 0) {
+      renderTree();
+      if (currentSelection) renderMain();
+    }
+    toast(`已删除「${tagValue}」，更新了 ${changed} 个词条`);
+  } else {
+    toast('已从选项库删除：' + tagValue);
+  }
+
+  openTagManager();
+}
+
+async function renameTag(libKey, oldValue) {
+  const newValue = prompt(`重命名「${oldValue}」为：`, oldValue);
+  if (newValue === null) return;
+  const trimmed = newValue.trim();
+  if (!trimmed) { toast('不能为空', true); return; }
+  if (trimmed === oldValue) return;
+
+  const isRankLib = libKey === 'customRanks' || libKey === 'customLangRanks';
+
+  // 不允许重名
+  if ((meta[libKey] || []).includes(trimmed)) {
+    toast('「' + trimmed + '」已存在，不允许重名', true);
+    return;
+  }
+
+  // 选项库里改名
+  meta[libKey] = (meta[libKey] || []).map(t => t === oldValue ? trimmed : t);
+  await dbPut('meta', { key: libKey, value: meta[libKey] });
+
+  // 词条里同步改名（阶元库不动词条）
+  if (!isRankLib) {
+    let changed = 0;
+    for (const node of nodes) {
+      if (node.type !== 'species') continue;
+      let nodeChanged = false;
+      (node.records || []).forEach(rec => {
+        if (libKey === 'partsLib') {
+          (rec.usages || []).forEach(u => {
+            u.parts = (u.parts || []).map(p => {
+              if (p === oldValue) { nodeChanged = true; return trimmed; }
+              return p;
+            });
+          });
+        } else if (libKey === 'waysLib') {
+          (rec.usages || []).forEach(u => {
+            (u.ways || []).forEach(w => {
+              if (w.tag === oldValue) { w.tag = trimmed; nodeChanged = true; }
+            });
+          });
+        } else if (libKey === 'ethnicLib') {
+          if (rec.ethnic === oldValue) { rec.ethnic = trimmed; nodeChanged = true; }
+        }
+      });
+      if (nodeChanged) {
+        await dbPut('nodes', node);
+        changed++;
+      }
+    }
+    nodes = await dbGetAll('nodes');
+    if (changed > 0) {
+      renderTree();
+      if (currentSelection) renderMain();
+    }
+    toast(`已重命名为「${trimmed}」，更新了 ${changed} 个词条`);
+  } else {
+    toast('已从选项库重命名：' + oldValue + ' → ' + trimmed);
+  }
+
+  openTagManager();
+}
+
+/* 跳转到地区索引并按省过滤 */
+function jumpToRegion(province) {
+  if (!province) return;
+  switchIndex('region', province);
+}
+
+/* 跳转到语言树并定位到该语言的节点 */
+function jumpToLang(langPath) {
+  if (!langPath) return;
+  // 在语言树里按完整路径找到对应节点
+  const parts = langPath.split(' > ');
+  let cur = getLangNode('lang_root');
+  if (!cur) return;
+  for (const part of parts) {
+    const next = (cur.children || [])
+      .map(cid => getLangNode(cid))
+      .find(c => c && c.cn === part);
+    if (!next) { toast('未找到该语言节点：' + part, true); return; }
+    cur = next;
+  }
+  // 切到语言树
+  currentTreeType = 'lang';
+  document.querySelectorAll('.tree-switch button').forEach(b => {
+    b.classList.toggle('active', b.dataset.tree === 'lang');
+  });
+  updateSearchPlaceholder();
+  document.getElementById('searchInput').value = '';
+  treeSearchQuery = '';
+  currentSelection = cur.id;
+  currentView = 'content';
+  expandedLangNodes = new Set();
+  expandAncestors(cur.id, 'lang');
+  renderTree();
+  renderMain();
+  scrollTreeToSelected();
+}
+
+init();
+</script>
+</body>
+</html>
